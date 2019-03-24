@@ -1,0 +1,15 @@
+"C:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\bin\armproc.dll" 
+
+"C:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\bin\armstlink2.dll" 
+
+"H:\BaiduNetdiskDownload\修改TXT文件\F4基于HAL库程序\3. 程序资料\4. 软件设计之FreeRTOS例程\YSF4_HAL_FreeRTOS-015. 消息队列（中断方式）\EWARM\YS-F4Pro\Exe\YS-F4Pro.out" 
+
+--plugin "C:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\bin\armbat.dll" 
+
+--device_macro "C:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\config\debugger\ST\STM32F4xx.dmac" 
+
+--flash_loader "C:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\config\flashloader\ST\FlashSTM32F4xxx.board" 
+
+
+
+
