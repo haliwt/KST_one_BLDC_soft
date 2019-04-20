@@ -38,6 +38,8 @@
 #include "dma_usart3/bsp_usart3.h"
 /* USER CODE BEGIN 0 */
 #include "bldc/bsp_bldc.h" 
+/* USER CODE BEGIN 0 */
+#include "adc/bsp_adc.h"
 #define ERR_INFO "\r\nEnter HardFault_Handler, System Halt.\r\n"
 
 extern TIM_HandleTypeDef htimx;
@@ -232,6 +234,17 @@ void TIM1_TRG_COM_TIM11_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&htimx_BLDC);
 }
+
+void ADC_IRQHandler(void)
+{
+  /* USER CODE BEGIN ADC1_2_IRQn 0 */
+  /* USER CODE END ADC1_2_IRQn 0 */
+  HAL_ADC_IRQHandler(&hadcx);
+  /* USER CODE BEGIN ADC1_2_IRQn 1 */
+
+  /* USER CODE END ADC1_2_IRQn 1 */
+}
+
 
 #if 0
 /* USER CODE BEGIN 1 */

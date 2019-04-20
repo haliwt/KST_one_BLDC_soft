@@ -9,15 +9,30 @@
 //#include "GeneralTIM/bsp_GeneralTIM.h"
 #include "bldc/bsp_bldc.h"
 #include "dma_usart3/bsp_usart3.h"
+#include "adc/bsp_adc.h"
 
 
 
 /* 私有宏定义 ----------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
 
+/* 私有类型定义 --------------------------------------------------------------*/
+__IO uint8_t Dir = 0;
+/* 私有宏定义 ----------------------------------------------------------------*/
+/* 私有变量 ------------------------------------------------------------------*/
+/* 扩展变量 ------------------------------------------------------------------*/
+extern __IO uint32_t uwStep ;
+
 /* 私有变量 ------------------------------------------------------------------*/
 uint8_t DMAaRxBuffer[8];                      // 接收数据 
 uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
+
+uint8_t aRxBuffer[8];
+// 用于保存转换计算后的电压值	 
+float ADC_ConvertedValueLocal;
+// AD转换结果值
+__IO uint16_t ADC_ConvertedValue;
+
 
 
 static TaskHandle_t xHandleTaskUserIF = NULL;
@@ -27,7 +42,6 @@ static TaskHandle_t xHandleTaskLED3 = NULL;
 static QueueHandle_t xQueue1 = NULL;
 static QueueHandle_t xQueue2 = NULL;
 
-uint8_t aRxBuffer[8];
 
 
 
@@ -203,6 +217,10 @@ static void vTaskTaskUserIF(void *pvParameters)
 	  ptMsg->ulData[7]=DMAaRxBuffer[7];
       ptMsg->usData[3]=aRxBuffer[3];;
 		 /* 向消息队列发数据 */
+       xQueueSendFromISR(xQueue1,
+                  (void *)&ptMsg,
+                   &xHigherPriorityTaskWoken);  
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);  
        xQueueSendFromISR(xQueue2,
                   (void *)&ptMsg,
                    &xHigherPriorityTaskWoken);
@@ -245,10 +263,11 @@ static void vTaskTaskUserIF(void *pvParameters)
 			 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 			//HAL_TIM_OC_Start_IT(&htim2,TIM_CHANNEL_2);
 			 //Key_AccessTimes(&key3,KEY_ACCESS_WRITE_CLEAR);
+         #if 1
          while(1)    
              { 
-                static uint8_t i = 0;
-                i++;
+               static uint8_t i = 0;
+               i++;
                if(i == 7)
                {
               
@@ -260,12 +279,14 @@ static void vTaskTaskUserIF(void *pvParameters)
                   uwStep = 1;
                  }
                }
+           
+         #endif 
            }
         //taskYIELD();
-     vTaskDelay(1000);
+     //vTaskDelay(1000);
+    }
+		 vTaskDelay(1000);
   }
-		
-}
 }
 
 /********************************************************
@@ -297,8 +318,8 @@ static void vTaskLED1(void *pvParameters)
 	
 		  //HAL_Delay(500);
 		
-			
-      printf("接收到消息队列数据ptMsg->ucMessageID = %#x\r\n", ptMsg->ucMessageID);
+	   printf("--------------------This is vTaskLED1 --------------\n");	
+      printf("vTaskLED1 ptMsg->ucMessageID = %#x\r\n", ptMsg->ucMessageID);
       printf("接收到消息队列数据ptMsg->ulData[0] = %#x\r\n", ptMsg->ulData[0]);
 	  printf("接收到消息队列数据ptMsg->ulData[1] = %#x\r\n", ptMsg->ulData[1]);
 	  printf("接收到消息队列数据ptMsg->ulData[2] = %#x\r\n", ptMsg->ulData[2]);
@@ -307,8 +328,8 @@ static void vTaskLED1(void *pvParameters)
 	  printf("接收到消息队列数据ptMsg->ulData[5] = %#x\r\n", ptMsg->ulData[5]);
 	  printf("接收到消息队列数据ptMsg->ulData[6] = %#x\r\n", ptMsg->ulData[6]);
 	  printf("接收到消息队列数据ptMsg->ulData[7] = %#x\r\n", ptMsg->ulData[7]);
-     printf("接收到消息队列数据ptMsg->usData[3] = %#x\r\n", ptMsg->usData[3]);
-			
+      printf("接收到消息队列数据ptMsg->usData[3] = %#x\r\n", ptMsg->usData[3]);
+	  	
 		
     }
     else
@@ -316,7 +337,7 @@ static void vTaskLED1(void *pvParameters)
       LED1_TOGGLE;
       
     }
-		vTaskDelay(5000);
+	vTaskDelay(100);
   }
 }
 
@@ -334,8 +355,9 @@ static void vTaskLED2(void *pvParameters)
 {
   BaseType_t xResult;
  // uint8_t  *ucQueueMsgValue;
+  
 
-  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(300); /* 设置最大等待时间为300ms */
+  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(200); /* 设置最大等待时间为300ms */
   uint8_t ucQueueMsgValue;
 
   while(1)
@@ -346,13 +368,21 @@ static void vTaskLED2(void *pvParameters)
   
     if(xResult == pdPASS)
     {
-      /* 成功接收，并通过串口将数据打印出来 */
-      printf("接收到消息队列数据ucQueueMsgValue = %#x\r\n", ucQueueMsgValue);
-			
+      printf("--------------------This is vTaskLED2 --------------\n");
+        /* 成功接收，并通过串口将数据打印出来 */
+      printf("vTaskLED2 ucQueueMsgValue = %#x\r\n", ucQueueMsgValue);
+	   ADC_ConvertedValue=HAL_ADC_GetValue(&hadcx);	
 		
 			//HAL_Delay(500);
        // Linear_Interpolation_XY(6400,6400,500);
 			printf("This is vTaskLED2 \n");
+       
+       HAL_Delay(100);
+    /* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
+       即当输入为3.3V时，AD转换结果为4096 */
+       ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+		printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
+		printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
     }
     else
     {
@@ -361,7 +391,7 @@ static void vTaskLED2(void *pvParameters)
         
       
     }
-	   vTaskDelay(300);
+	   vTaskDelay(100);
   }
 }
 
@@ -373,29 +403,25 @@ static void vTaskLED2(void *pvParameters)
   */
 static void vTaskLED3(void *pvParameters)
 {
-    int i;
-	  while(1)
+    
+	while(1)
     {
-      LED3_TOGGLE;
-			if(i==0)
-			{
-			   printf("This is vTaskLED3 \n");
-              
-		     }
-			
-         
-  
-      vTaskDelay(1000);
-    }
-}
+      
+             
+       vTaskDelay(100);
+     }
+ }
 
 
-/**
+
+/***********************************************************************************
+  *
   * 函数功能: 创建任务应用
   * 输入参数: 无
   * 返 回 值: 无
   * 说    明: 无
-  */
+  *
+***********************************************************************************/
 static void AppTaskCreate (void)
 {
 
@@ -423,7 +449,7 @@ static void AppTaskCreate (void)
 	
 	xTaskCreate( vTaskLED3,     		    /* 任务函数  */
                  "vTaskLED3",   		  /* 任务名    */
-                 1024,             		/* 任务栈大小，单位word，也就是4字节 */
+                 512,             		/* 任务栈大小，单位word，也就是4字节 */
                  NULL,           		  /* 任务参数  */
                  4,               		/* 任务优先级*/
                  &xHandleTaskLED3 );  /* 任务句柄  */
@@ -450,7 +476,7 @@ static void AppObjCreate (void)
 	xQueue2 = xQueueCreate(10, sizeof(struct Msg *));
     if( xQueue2 == 0 )
     {
-        /* 没有创建成功，用户可以在这里加入创建失败的处理机制 */
+       printf("Thisi create is fail \n") ;/* 没有创建成功，用户可以在这里加入创建失败的处理机制 */
     }
 }
 #if 0
@@ -477,5 +503,15 @@ void HAL_SYSTICK_Callback()
       uwStep = 1;
   }
 }
-#endif 
 
+/**
+  * 函数功能: AD转换结束回调函数
+  * 输入参数: hadc：AD设备类型句柄
+  * 返 回 值: 无
+  * 说    明: 无
+  */
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  ADC_ConvertedValue=HAL_ADC_GetValue(&hadcx);
+}  
+#endif 
