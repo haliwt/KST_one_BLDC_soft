@@ -124,6 +124,8 @@ int main(void)
   /* 基本定时器初始化：100us中断一次 */
  BLDCMOTOR_TIMx_Init();
   /* 启动定时器 */
+  HAL_TIM_Base_Start(&htimx_BLDC);
+  /* 启动定时器 */
 	
 	/* 创建任务 */
 	AppTaskCreate();
@@ -161,11 +163,11 @@ static void vTaskTaskUserIF(void *pvParameters)
       
       // HAL_UART_Receive(&husart_debug,aRxBuffer,8,0xffff);
 	
-			HAL_UART_Receive(&husart_usart3,DMAaRxBuffer,8,0xffff);
+		HAL_UART_Receive(&husart_usart3,DMAaRxBuffer,8,0xffff);
 			//HAL_UART_Receive_DMA(&husartx,DMAaRxBuffer,8);
 	    printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
-			printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
-			printf("DMA USART3 serial \n");
+		printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
+		printf("DMA USART3 serial \n");
       if(KEY1_StateRead()==KEY_DOWN)//if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
       {
         printf("=================================================\r\n");
@@ -191,7 +193,7 @@ static void vTaskTaskUserIF(void *pvParameters)
       
       /* 初始化数组 */
       
-    ptMsg->ulData[0]=DMAaRxBuffer[0];
+      ptMsg->ulData[0]=DMAaRxBuffer[0];
 	  ptMsg->ulData[1]=DMAaRxBuffer[1];
 	  ptMsg->ulData[2]=DMAaRxBuffer[2];
 	  ptMsg->ulData[3]=DMAaRxBuffer[3];
@@ -199,7 +201,7 @@ static void vTaskTaskUserIF(void *pvParameters)
 	  ptMsg->ulData[5]=DMAaRxBuffer[5];
 	  ptMsg->ulData[6]=DMAaRxBuffer[6];
 	  ptMsg->ulData[7]=DMAaRxBuffer[7];
-    ptMsg->usData[3]=aRxBuffer[3];;
+      ptMsg->usData[3]=aRxBuffer[3];;
 		 /* 向消息队列发数据 */
        xQueueSendFromISR(xQueue2,
                   (void *)&ptMsg,
@@ -211,7 +213,8 @@ static void vTaskTaskUserIF(void *pvParameters)
       if(DMAaRxBuffer[0]==0xa1)//if(Key_AccessTimes(&key3,KEY_ACCESS_READ)!=0)//按键被按下过
       {         
         printf("KEY3按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
-		    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        
          
        if(DMAaRxBuffer[1]==0x01)
 		  {
@@ -242,13 +245,27 @@ static void vTaskTaskUserIF(void *pvParameters)
 			 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 			//HAL_TIM_OC_Start_IT(&htim2,TIM_CHANNEL_2);
 			 //Key_AccessTimes(&key3,KEY_ACCESS_WRITE_CLEAR);
-		 
-		 }
-		  }
+         while(1)    
+             { 
+                static uint8_t i = 0;
+                i++;
+               if(i == 7)
+               {
+              
+                    i = 0;
+                /* 每5ms产生COM事件，触发换相 */
+                HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
+                uwStep++;
+                if( uwStep == 7)
+                  uwStep = 1;
+                 }
+               }
+           }
         //taskYIELD();
-     vTaskDelay(100);
+     vTaskDelay(1000);
   }
 		
+}
 }
 
 /********************************************************
@@ -281,8 +298,8 @@ static void vTaskLED1(void *pvParameters)
 		  //HAL_Delay(500);
 		
 			
-    printf("接收到消息队列数据ptMsg->ucMessageID = %#x\r\n", ptMsg->ucMessageID);
-    printf("接收到消息队列数据ptMsg->ulData[0] = %#x\r\n", ptMsg->ulData[0]);
+      printf("接收到消息队列数据ptMsg->ucMessageID = %#x\r\n", ptMsg->ucMessageID);
+      printf("接收到消息队列数据ptMsg->ulData[0] = %#x\r\n", ptMsg->ulData[0]);
 	  printf("接收到消息队列数据ptMsg->ulData[1] = %#x\r\n", ptMsg->ulData[1]);
 	  printf("接收到消息队列数据ptMsg->ulData[2] = %#x\r\n", ptMsg->ulData[2]);
 	  printf("接收到消息队列数据ptMsg->ulData[3] = %#x\r\n", ptMsg->ulData[3]);
@@ -297,9 +314,9 @@ static void vTaskLED1(void *pvParameters)
     else
     {
       LED1_TOGGLE;
-
+      
     }
-		vTaskDelay(500);
+		vTaskDelay(5000);
   }
 }
 
@@ -334,12 +351,15 @@ static void vTaskLED2(void *pvParameters)
 			
 		
 			//HAL_Delay(500);
-     // Linear_Interpolation_XY(6400,6400,500);
+       // Linear_Interpolation_XY(6400,6400,500);
 			printf("This is vTaskLED2 \n");
     }
     else
     {
       LED2_TOGGLE;
+        
+        
+      
     }
 	   vTaskDelay(300);
   }
@@ -360,12 +380,15 @@ static void vTaskLED3(void *pvParameters)
 			if(i==0)
 			{
 			   printf("This is vTaskLED3 \n");
+              
+		     }
 			
          
-		  }
+  
       vTaskDelay(1000);
     }
 }
+
 
 /**
   * 函数功能: 创建任务应用
@@ -378,7 +401,7 @@ static void AppTaskCreate (void)
 
     xTaskCreate( vTaskTaskUserIF,   	/* 任务函数  */
                  "vTaskUserIF",     	/* 任务名    */
-                 1024,               	/* 任务栈大小，单位word，也就是4字节 */
+                 4096,               	/* 任务栈大小，单位word，也就是4字节 */
                  NULL,              	/* 任务参数  */
                  1,                 	/* 任务优先级*/
                  &xHandleTaskUserIF );  /* 任务句柄  */
@@ -400,7 +423,7 @@ static void AppTaskCreate (void)
 	
 	xTaskCreate( vTaskLED3,     		    /* 任务函数  */
                  "vTaskLED3",   		  /* 任务名    */
-                 2048,             		/* 任务栈大小，单位word，也就是4字节 */
+                 1024,             		/* 任务栈大小，单位word，也就是4字节 */
                  NULL,           		  /* 任务参数  */
                  4,               		/* 任务优先级*/
                  &xHandleTaskLED3 );  /* 任务句柄  */
@@ -430,5 +453,29 @@ static void AppObjCreate (void)
         /* 没有创建成功，用户可以在这里加入创建失败的处理机制 */
     }
 }
+#if 0
+/**
+  * 函数功能: 系统滴答定时器中断回调函数
+  * 输入参数: 无
+  * 返 回 值: 无
+  * 说    明: 每发生一次滴答定时器中断进入该回调函数一次
+  */
+void HAL_SYSTICK_Callback()
+{
+  static uint8_t i = 0;
 
+  i++;
+	
+  if(i == 7)
+  {
+  
+		i = 0;
+    /* 每5ms产生COM事件，触发换相 */
+    HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
+    uwStep++;
+    if( uwStep == 7)
+      uwStep = 1;
+  }
+}
+#endif 
 

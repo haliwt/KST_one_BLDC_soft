@@ -37,10 +37,13 @@
 #include "cmsis_os.h"
 #include "dma_usart3/bsp_usart3.h"
 /* USER CODE BEGIN 0 */
+#include "bldc/bsp_bldc.h" 
 #define ERR_INFO "\r\nEnter HardFault_Handler, System Halt.\r\n"
 
 extern TIM_HandleTypeDef htimx;
 extern TIM_HandleTypeDef htim2;
+
+
 
 /* USER CODE END 0 */
 
@@ -204,6 +207,32 @@ void TIM2_IRQHandler(void)
   //HAL_TIM_IRQHandler(&htim2);
   
 }
+extern __IO uint8_t MSG ;
+#if 0
+void SysTick_Handler(void)
+{
+  /* USER CODE BEGIN SysTick_IRQn 0 */
+
+  /* USER CODE END SysTick_IRQn 0 */
+  HAL_IncTick();
+  HAL_SYSTICK_IRQHandler();
+  /* Generate a commutation event each 1 ms */
+  
+  /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* USER CODE END SysTick_IRQn 1 */
+}
+#endif 
+/**
+  * @brief  This function handles TIM1 Trigger and Commutation Interrupt and TIM11 Handler.
+  * @param  None
+  * @retval None
+  */
+void TIM1_TRG_COM_TIM11_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&htimx_BLDC);
+}
+
 #if 0
 /* USER CODE BEGIN 1 */
 void USARTx_DMAx_CHANNELn_IRQHANDLER(void)

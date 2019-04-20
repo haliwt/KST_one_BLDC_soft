@@ -25,19 +25,19 @@ typedef enum
  * 都是与GPIOH，GPIO_Pin_9相关的，我们专门把这些与开发板硬件相关的内容定义为宏，
  * 这对于修改或者移植程序非常方便。
  */
-#define LED1_RCC_CLK_ENABLE()         __HAL_RCC_GPIOH_CLK_ENABLE()
-#define LED1_GPIO_PIN                 GPIO_PIN_4 //WT.EDIT
-#define LED1_GPIO                     GPIOH
+#define LED1_RCC_CLK_ENABLE()         __HAL_RCC_GPIOD_CLK_ENABLE()
+#define LED1_GPIO_PIN                 GPIO_PIN_11//GPIO_PIN_9  WT.EDIT
+#define LED1_GPIO                     GPIOD
 
 
-#define LED2_RCC_CLK_ENABLE()         __HAL_RCC_GPIOH_CLK_ENABLE()
-#define LED2_GPIO_PIN                 GPIO_PIN_5   //WT.EDIT
-#define LED2_GPIO                     GPIOH
+#define LED2_RCC_CLK_ENABLE()         __HAL_RCC_GPIOD_CLK_ENABLE()
+#define LED2_GPIO_PIN                 GPIO_PIN_3   //WT.EDIT 2019-04-20
+#define LED2_GPIO                     GPIOD
 
 
-#define LED3_RCC_CLK_ENABLE()         __HAL_RCC_GPIOI_CLK_ENABLE()
-#define LED3_GPIO_PIN                 GPIO_PIN_4   //WT.EDIT
-#define LED3_GPIO                     GPIOI
+#define LED3_RCC_CLK_ENABLE()         __HAL_RCC_GPIOE_CLK_ENABLE()
+#define LED3_GPIO_PIN                 GPIO_PIN_6
+#define LED3_GPIO                     GPIOE
 
 #define LED1_ON                       HAL_GPIO_WritePin(LED1_GPIO,LED1_GPIO_PIN,GPIO_PIN_SET)    // 输出高电平
 #define LED1_OFF                      HAL_GPIO_WritePin(LED1_GPIO,LED1_GPIO_PIN,GPIO_PIN_RESET)  // 输出低电平
@@ -59,4 +59,4 @@ void LEDx_StateSet(uint8_t LEDx,LEDState_TypeDef state);
 
 #endif  // __BSP_LED_H__
 
-/******************* (C) COPYRIGHT 2015-2020 硬石嵌入式开发团队 *****END OF FILE****/
+

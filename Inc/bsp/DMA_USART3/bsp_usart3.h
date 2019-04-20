@@ -12,11 +12,11 @@
 #define HMI_USART_RCC_CLK_ENABLE()                 __HAL_RCC_USART3_CLK_ENABLE()
 #define HMI_USART_RCC_CLK_DISABLE()                __HAL_RCC_USART3_CLK_DISABLE()
 
-#define HMI_USARTx_GPIO_ClK_ENABLE()               __HAL_RCC_GPIOD_CLK_ENABLE()
-#define HMI_USARTx_Tx_GPIO_PIN                     GPIO_PIN_8
-#define HMI_USARTx_Tx_GPIO                         GPIOD
-#define HMI_USARTx_Rx_GPIO_PIN                     GPIO_PIN_9
-#define HMI_USARTx_Rx_GPIO                         GPIOD
+#define HMI_USARTx_GPIO_ClK_ENABLE()               __HAL_RCC_GPIOC_CLK_ENABLE()
+#define HMI_USARTx_Tx_GPIO_PIN                     GPIO_PIN_10//GPIO_PIN_8 //WT.EDIT 
+#define HMI_USARTx_Tx_GPIO                         GPIOC//GPIOD
+#define HMI_USARTx_Rx_GPIO_PIN                     GPIO_PIN_11//GPIO_PIN_9
+#define HMI_USARTx_Rx_GPIO                         GPIOC//GPIOD
 
 #define HMI_USARTx_AFx                             GPIO_AF7_USART3
 
