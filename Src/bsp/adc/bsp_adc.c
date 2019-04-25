@@ -108,4 +108,14 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
   }
 } 
 
-/******************* (C) COPYRIGHT 2015-2020 硬石嵌入式开发团队 *****END OF FILE****/
+void ADC_IRQHandler(void)
+{
+  /* USER CODE BEGIN ADC1_2_IRQn 0 */
+  /* USER CODE END ADC1_2_IRQn 0 */
+  HAL_ADC_IRQHandler(&hadcx);
+  /* USER CODE BEGIN ADC1_2_IRQn 1 */
+
+  /* USER CODE END ADC1_2_IRQn 1 */
+}
+
+

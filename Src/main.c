@@ -139,7 +139,11 @@ int main(void)
  BLDCMOTOR_TIMx_Init();
   /* 启动定时器 */
   HAL_TIM_Base_Start(&htimx_BLDC);
-  /* 启动定时器 */
+  /* ADC 初始化 */
+   MX_ADCx_Init();
+
+  /* 启动AD转换并使能AD中断 */
+  HAL_ADC_Start_IT(&hadcx);
 	
 	/* 创建任务 */
 	AppTaskCreate();
@@ -181,6 +185,22 @@ static void vTaskTaskUserIF(void *pvParameters)
 			//HAL_UART_Receive_DMA(&husartx,DMAaRxBuffer,8);
 	    printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
 		printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
+        taskENTER_CRITICAL();   
+             { 
+               static uint8_t i = 0;
+               i++;
+               if(i == 7)
+               {
+              
+                    i = 0;
+                /* 每5ms产生COM事件，触发换相 */
+                HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
+                uwStep++;
+                if( uwStep == 7)
+                  uwStep = 1;
+                 }
+               }
+           taskEXIT_CRITICAL();
 		printf("DMA USART3 serial \n");
       if(KEY1_StateRead()==KEY_DOWN)//if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
       {
@@ -264,7 +284,7 @@ static void vTaskTaskUserIF(void *pvParameters)
 			//HAL_TIM_OC_Start_IT(&htim2,TIM_CHANNEL_2);
 			 //Key_AccessTimes(&key3,KEY_ACCESS_WRITE_CLEAR);
          #if 1
-         while(1)    
+           taskENTER_CRITICAL();   
              { 
                static uint8_t i = 0;
                i++;
@@ -279,13 +299,14 @@ static void vTaskTaskUserIF(void *pvParameters)
                   uwStep = 1;
                  }
                }
+             taskEXIT_CRITICAL();
            
          #endif 
            }
         //taskYIELD();
      //vTaskDelay(1000);
     }
-		 vTaskDelay(1000);
+	 vTaskDelay(1000);
   }
 }
 
@@ -357,7 +378,7 @@ static void vTaskLED2(void *pvParameters)
  // uint8_t  *ucQueueMsgValue;
   
 
-  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(200); /* 设置最大等待时间为300ms */
+  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(1100); /* 设置最大等待时间为300ms */
   uint8_t ucQueueMsgValue;
 
   while(1)
@@ -377,7 +398,7 @@ static void vTaskLED2(void *pvParameters)
        // Linear_Interpolation_XY(6400,6400,500);
 			printf("This is vTaskLED2 \n");
        
-       HAL_Delay(100);
+       HAL_Delay(1000);
     /* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
        即当输入为3.3V时，AD转换结果为4096 */
        ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
@@ -391,7 +412,7 @@ static void vTaskLED2(void *pvParameters)
         
       
     }
-	   vTaskDelay(100);
+	   vTaskDelay(600);
   }
 }
 
