@@ -4,17 +4,17 @@
 #include "cmsis_os.h"
 #include "led/bsp_led.h"
 //#include "BasicTIM/bsp_BasicTIM.h" 
-#include "usart/bsp_debug_usart.h"
+#include "usart/bsp_usartx.h"
 #include "key/bsp_key.h"
 //#include "GeneralTIM/bsp_GeneralTIM.h"
 #include "bldc/bsp_bldc.h"
-#include "dma_usart3/bsp_usart3.h"
+
 #include "adc/bsp_adc.h"
 
 
 
 /* 私有宏定义 ----------------------------------------------------------------*/
-#define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
+#define SENDBUFF_SIZE              8  // 串口DMA发送缓冲区大小
 
 /* 私有类型定义 --------------------------------------------------------------*/
 __IO uint8_t Dir = 0;
@@ -127,11 +127,9 @@ int main(void)
   /* 配置系统时钟 */
   SystemClock_Config();
   
-  MX_DEBUG_USART_Init();
-	
-
-	MX_USART3_Init();
-  /* 初始化LED */
+   /* 初始化串口并配置串口中断优先级 */
+  MX_USARTx_Init();
+	/* 初始化LED */
   LED_GPIO_Init();
   /* 板子按键初始化 */
   KEY_GPIO_Init();
@@ -180,27 +178,13 @@ static void vTaskTaskUserIF(void *pvParameters)
      
       
       // HAL_UART_Receive(&husart_debug,aRxBuffer,8,0xffff);
-	
-		HAL_UART_Receive(&husart_usart3,DMAaRxBuffer,8,0xffff);
+	   // HAL_UART_Receive(&husartx,&ch, 1, 0xffff);
+		HAL_UART_Receive(&husartx,DMAaRxBuffer,8,0xffff);
 			//HAL_UART_Receive_DMA(&husartx,DMAaRxBuffer,8);
 	    printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
 		printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
-        taskENTER_CRITICAL();   
-             { 
-               static uint8_t i = 0;
-               i++;
-               if(i == 7)
-               {
-              
-                    i = 0;
-                /* 每5ms产生COM事件，触发换相 */
-                HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
-                uwStep++;
-                if( uwStep == 7)
-                  uwStep = 1;
-                 }
-               }
-           taskEXIT_CRITICAL();
+       
+       
 		printf("DMA USART3 serial \n");
       if(KEY1_StateRead()==KEY_DOWN)//if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
       {
@@ -427,9 +411,24 @@ static void vTaskLED3(void *pvParameters)
     
 	while(1)
     {
-      
+       taskENTER_CRITICAL();   
+             { 
+               static uint8_t i = 0;
+               i++;
+               if(i == 7)
+               {
+              
+                    i = 0;
+                /* 每5ms产生COM事件，触发换相 */
+                HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
+                uwStep++;
+                if( uwStep == 7)
+                  uwStep = 1;
+                 }
+               }
+           taskEXIT_CRITICAL();
              
-       vTaskDelay(100);
+       vTaskDelay(10);
      }
  }
 
