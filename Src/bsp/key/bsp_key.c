@@ -72,7 +72,7 @@ void KEY_GPIO_Init(void)
   *           KEY_UP  ：按键没被按下
   * 说    明：无。
   */
-KEYState_TypeDef KEY1_StateRead(void)
+KEYState_TypeDef START_StateRead(void)
 {
   /* 读取此时按键值并判断是否是被按下状态，如果是被按下状态进入函数内 */
   if(HAL_GPIO_ReadPin(KEY1_GPIO,KEY1_GPIO_PIN)==KEY1_DOWN_LEVEL)
@@ -99,7 +99,7 @@ KEYState_TypeDef KEY1_StateRead(void)
   *           KEY_UP  ：按键没被按下
   * 说    明：无。
   */
-KEYState_TypeDef KEY2_StateRead(void)
+KEYState_TypeDef DIR_StateRead(void)
 {
   /* 读取此时按键值并判断是否是被按下状态，如果是被按下状态进入函数内 */
   if(HAL_GPIO_ReadPin(KEY2_GPIO,KEY2_GPIO_PIN)==KEY2_DOWN_LEVEL)
@@ -126,7 +126,7 @@ KEYState_TypeDef KEY2_StateRead(void)
   *           KEY_UP  ：按键没被按下
   * 说    明：无。
   */
-KEYState_TypeDef KEY3_StateRead(void)
+KEYState_TypeDef BRAKE_StateRead(void)
 {
   /* 读取此时按键值并判断是否是被按下状态，如果是被按下状态进入函数内 */
   if(HAL_GPIO_ReadPin(KEY3_GPIO,KEY3_GPIO_PIN)==KEY3_DOWN_LEVEL)

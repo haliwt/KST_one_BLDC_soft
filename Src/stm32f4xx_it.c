@@ -234,30 +234,11 @@ void TIM1_TRG_COM_TIM11_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&htimx_BLDC);
 }
-#if 0
-void ADC_IRQHandler(void)
+
+
+void TIM4_IRQHandler(void)
 {
-  /* USER CODE BEGIN ADC1_2_IRQn 0 */
-  /* USER CODE END ADC1_2_IRQn 0 */
-  HAL_ADC_IRQHandler(&hadcx);
-  /* USER CODE BEGIN ADC1_2_IRQn 1 */
-
-  /* USER CODE END ADC1_2_IRQn 1 */
+  HAL_TIM_IRQHandler(&htimx_HALL);
 }
-#endif 
-
-#if 0
-/* USER CODE BEGIN 1 */
-void USARTx_DMAx_CHANNELn_IRQHANDLER(void)
-{
-  /* USER CODE BEGIN DMA2_Stream7_IRQn 0 */
-
-  /* USER CODE END DMA2_Stream7_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usartx_tx);
-  /* USER CODE BEGIN DMA2_Stream7_IRQn 1 */
-
-  /* USER CODE END DMA2_Stream7_IRQn 1 */
-}
-#endif 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

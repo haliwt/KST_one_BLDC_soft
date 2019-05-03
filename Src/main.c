@@ -17,11 +17,16 @@
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
 
 /* 私有类型定义 --------------------------------------------------------------*/
-__IO uint8_t Dir = 0;
+//__IO int32_t  Dir;
 /* 私有宏定义 ----------------------------------------------------------------*/
 /* 私有变量 ------------------------------------------------------------------*/
 /* 扩展变量 ------------------------------------------------------------------*/
-extern __IO uint32_t uwStep ;
+//__IO int32_t  uwStep ;
+
+uint32_t IS_EnableMotor = 0;  // 使能电机标志
+uint32_t Time_CNT = 0;
+int32_t  flag = 0;
+int32_t  start_flag = 0;
 
 /* 私有变量 ------------------------------------------------------------------*/
 uint8_t DMAaRxBuffer[8];                      // 接收数据 
@@ -185,24 +190,9 @@ static void vTaskTaskUserIF(void *pvParameters)
 			//HAL_UART_Receive_DMA(&husartx,DMAaRxBuffer,8);
 	    printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
 		printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
-        taskENTER_CRITICAL();   
-             { 
-               static uint8_t i = 0;
-               i++;
-               if(i == 7)
-               {
-              
-                    i = 0;
-                /* 每5ms产生COM事件，触发换相 */
-                HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
-                uwStep++;
-                if( uwStep == 7)
-                  uwStep = 1;
-                 }
-               }
-           taskEXIT_CRITICAL();
+       
 		printf("DMA USART3 serial \n");
-      if(KEY1_StateRead()==KEY_DOWN)//if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
+      if(START_StateRead()==KEY_DOWN)//if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
       {
         printf("=================================================\r\n");
         printf("任务名      任务状态 优先级   剩余栈 任务序号\r\n");
@@ -214,7 +204,7 @@ static void vTaskTaskUserIF(void *pvParameters)
         printf("%s\r\n", pcWriteBuffer);
         //Key_AccessTimes(&key1,KEY_ACCESS_WRITE_CLEAR);
       }
-      
+      if(DIR_StateRead()==KEY_DOWN)
      //if(aRxBuffer[0]==0xa6)////if(Key_AccessTimes(&key2,KEY_ACCESS_READ)!=0)//按键被按下过
       {         
        // printf("KEY2按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
@@ -283,30 +273,12 @@ static void vTaskTaskUserIF(void *pvParameters)
 			 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 			//HAL_TIM_OC_Start_IT(&htim2,TIM_CHANNEL_2);
 			 //Key_AccessTimes(&key3,KEY_ACCESS_WRITE_CLEAR);
-         #if 1
-           taskENTER_CRITICAL();   
-             { 
-               static uint8_t i = 0;
-               i++;
-               if(i == 7)
-               {
-              
-                    i = 0;
-                /* 每5ms产生COM事件，触发换相 */
-                HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
-                uwStep++;
-                if( uwStep == 7)
-                  uwStep = 1;
-                 }
-               }
-             taskEXIT_CRITICAL();
-           
-         #endif 
+         
            }
-        //taskYIELD();
+      
      //vTaskDelay(1000);
     }
-	 vTaskDelay(1000);
+	  vTaskDelay(100);
   }
 }
 
@@ -356,7 +328,7 @@ static void vTaskLED1(void *pvParameters)
     else
     {
       LED1_TOGGLE;
-      
+       
     }
 	vTaskDelay(100);
   }
@@ -374,45 +346,18 @@ static void vTaskLED1(void *pvParameters)
 
 static void vTaskLED2(void *pvParameters)
 {
-  BaseType_t xResult;
- // uint8_t  *ucQueueMsgValue;
-  
-
-  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(1100); /* 设置最大等待时间为300ms */
-  uint8_t ucQueueMsgValue;
-
+ 
   while(1)
   {
-   xResult = xQueueReceive(xQueue1,                   /* 消息队列句柄 */
-                          (void *)&ucQueueMsgValue,  /* 存储接收到的数据到变量ucQueueMsgValue中 */
-                          (TickType_t)xMaxBlockTime);/* 设置阻塞时间 */
-  
-    if(xResult == pdPASS)
-    {
-      printf("--------------------This is vTaskLED2 --------------\n");
-        /* 成功接收，并通过串口将数据打印出来 */
-      printf("vTaskLED2 ucQueueMsgValue = %#x\r\n", ucQueueMsgValue);
-	   ADC_ConvertedValue=HAL_ADC_GetValue(&hadcx);	
-		
-			//HAL_Delay(500);
-       // Linear_Interpolation_XY(6400,6400,500);
-			printf("This is vTaskLED2 \n");
-       
-       HAL_Delay(1000);
-    /* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
+     printf("This is vTaskLED2 \n");
+	  
+	 /* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
        即当输入为3.3V时，AD转换结果为4096 */
        ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
 		printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
 		printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
-    }
-    else
-    {
-      LED2_TOGGLE;
-        
-        
-      
-    }
-	   vTaskDelay(600);
+   
+	  vTaskDelay(200);
   }
 }
 
@@ -427,9 +372,34 @@ static void vTaskLED3(void *pvParameters)
     
 	while(1)
     {
-      
-             
-       vTaskDelay(100);
+        
+        taskENTER_CRITICAL();  
+           /* 使能电机 */
+    //if(START_StateRead() == KEY_DOWN)
+    {
+      Enable_BLDC();
+      /* 先以恒定的转空比启动,然后再来调速 */
+//      BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
+//      HAL_Delay(100);
+      start_flag  = 1;
+      IS_EnableMotor = 1;
+      LED2_OFF;
+    }
+     /* 电机换向 */
+    if(DIR_StateRead() == KEY_DOWN)
+    {
+      Dir = -Dir;
+    }
+    /* 电机停止 */
+    if(BRAKE_StateRead() == KEY_DOWN)
+    {
+      start_flag = 0;
+      Disable_BLDC();
+      IS_EnableMotor = 0;      
+    }
+             taskEXIT_CRITICAL();
+           
+       vTaskDelay(20);
      }
  }
 
@@ -500,39 +470,17 @@ static void AppObjCreate (void)
        printf("Thisi create is fail \n") ;/* 没有创建成功，用户可以在这里加入创建失败的处理机制 */
     }
 }
-#if 0
-/**
-  * 函数功能: 系统滴答定时器中断回调函数
-  * 输入参数: 无
-  * 返 回 值: 无
-  * 说    明: 每发生一次滴答定时器中断进入该回调函数一次
-  */
 void HAL_SYSTICK_Callback()
 {
-  static uint8_t i = 0;
-
-  i++;
-	
-  if(i == 7)
+  if(IS_EnableMotor)
   {
-  
-		i = 0;
-    /* 每5ms产生COM事件，触发换相 */
-    HAL_TIM_GenerateEvent(&htimx_BLDC, TIM_EVENTSOURCE_COM);
-    uwStep++;
-    if( uwStep == 7)
-      uwStep = 1;
+    BLDCMotor.Lock_Time++;//Lock_Time++;
+    /* 超过100ms 则认为是堵转,停止PWM输出 */
+    if(Lock_Time >= 100)  //100ms
+    {
+      Disable_BLDC();
+      LED2_TOGGLE;
+      BLDCMotor.Lock_Time = 0;//Lock_Time = 0;
+    }
   }
 }
-
-/**
-  * 函数功能: AD转换结束回调函数
-  * 输入参数: hadc：AD设备类型句柄
-  * 返 回 值: 无
-  * 说    明: 无
-  */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-  ADC_ConvertedValue=HAL_ADC_GetValue(&hadcx);
-}  
-#endif 

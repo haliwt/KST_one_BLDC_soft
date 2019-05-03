@@ -12,19 +12,19 @@ typedef enum
 }KEYState_TypeDef;
 
 /* 宏定义 --------------------------------------------------------------------*/
-#define KEY1_RCC_CLK_ENABLE           __HAL_RCC_GPIOE_CLK_ENABLE
-#define KEY1_GPIO_PIN                 GPIO_PIN_0
-#define KEY1_GPIO                     GPIOE
+#define KEY1_RCC_CLK_ENABLE           __HAL_RCC_GPIOB_CLK_ENABLE
+#define KEY1_GPIO_PIN                 GPIO_PIN_0  //WT.EDIT START
+#define KEY1_GPIO                     GPIOB
 #define KEY1_DOWN_LEVEL               0  /* 根据原理图设计，KEY1按下时引脚为高电平，所以这里设置为1 */
 
-#define KEY2_RCC_CLK_ENABLE           __HAL_RCC_GPIOE_CLK_ENABLE
-#define KEY2_GPIO_PIN                 GPIO_PIN_1
-#define KEY2_GPIO                     GPIOE
+#define KEY2_RCC_CLK_ENABLE           __HAL_RCC_GPIOB_CLK_ENABLE
+#define KEY2_GPIO_PIN                 GPIO_PIN_1 //WT.EDIT  DIR
+#define KEY2_GPIO                     GPIOB
 #define KEY2_DOWN_LEVEL               0  /* 根据原理图设计，KEY2按下时引脚为低电平，所以这里设置为0 */
 
-#define KEY3_RCC_CLK_ENABLE           __HAL_RCC_GPIOE_CLK_ENABLE
-#define KEY3_GPIO_PIN                 GPIO_PIN_2
-#define KEY3_GPIO                     GPIOE
+#define KEY3_RCC_CLK_ENABLE           __HAL_RCC_GPIOC_CLK_ENABLE
+#define KEY3_GPIO_PIN                 GPIO_PIN_4 //WT.EDIT BRAKE
+#define KEY3_GPIO                     GPIOC
 #define KEY3_DOWN_LEVEL               0  /* 根据原理图设计，KEY2按下时引脚为低电平，所以这里设置为0 */
 
 #define KEY4_RCC_CLK_ENABLE           __HAL_RCC_GPIOE_CLK_ENABLE
@@ -40,9 +40,9 @@ typedef enum
 /* 扩展变量 ------------------------------------------------------------------*/
 /* 函数声明 ------------------------------------------------------------------*/
 void KEY_GPIO_Init(void);
-KEYState_TypeDef KEY1_StateRead(void);
-KEYState_TypeDef KEY2_StateRead(void);
-KEYState_TypeDef KEY3_StateRead(void);
+KEYState_TypeDef START_StateRead(void);
+KEYState_TypeDef DIR_StateRead(void);
+KEYState_TypeDef BRAKE_StateRead(void);
 KEYState_TypeDef KEY4_StateRead(void);
 KEYState_TypeDef KEY5_StateRead(void);
 
