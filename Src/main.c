@@ -35,9 +35,7 @@ uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
 
 // 用于保存转换计算后的电压值	 
 float ADC_ConvertedValueLocal;
-// AD转换结果值
-__IO uint16_t ADC_ConvertedValue;
-
+uint32_t ADC_ConvertedValue;
 
 
 static TaskHandle_t xHandleTaskUserIF = NULL;
@@ -46,9 +44,6 @@ static TaskHandle_t xHandleTaskLED2 = NULL;
 static TaskHandle_t xHandleTaskLED3 = NULL;
 static QueueHandle_t xQueue1 = NULL;
 static QueueHandle_t xQueue2 = NULL;
-
-
-
 
 typedef struct Msg
 {
@@ -145,10 +140,13 @@ int main(void)
   /* 启动定时器 */
   HAL_TIM_Base_Start(&htimx_BLDC);
   /* ADC 初始化 */
-   MX_ADCx_Init();
+   MX_DMA_Init();
+  /* ADC 初始化 */
+  MX_ADCx_Init();
 
-  /* 启动AD转换并使能AD中断 */
-  HAL_ADC_Start_IT(&hadcx);
+/* 启动AD转换并使能DMA传输和中断 */
+  HAL_ADC_Start_DMA(&hadcx,&ADC_ConvertedValue,1); 
+
 	
 	/* 创建任务 */
 	AppTaskCreate();
