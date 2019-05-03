@@ -49,9 +49,9 @@ void MX_DMA_Init(void)
   
   DMAx_RCC_CLK_ENABLE();
   
-  /* ¨ªa¨¦¨¨?D??¨®??¨¨??????o¨ª¨º1?¨¹?D?? */
- // HAL_NVIC_SetPriority(ADCx_DMA_IRQx, 4, 0);
- // HAL_NVIC_EnableIRQ(ADCx_DMA_IRQx); 
+  /* DMAÖÐ¶ÏÉèÖÃ */
+  HAL_NVIC_SetPriority(ADCx_DMA_IRQx, 4, 0);
+  HAL_NVIC_EnableIRQ(ADCx_DMA_IRQx); 
 }
 
 /**

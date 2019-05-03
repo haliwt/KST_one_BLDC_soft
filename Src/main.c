@@ -32,7 +32,7 @@ int32_t  start_flag = 0;
 uint8_t DMAaRxBuffer[8];                      // 接收数据 
 uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
 
-uint8_t aRxBuffer[8];
+
 // 用于保存转换计算后的电压值	 
 float ADC_ConvertedValueLocal;
 // AD转换结果值
@@ -183,15 +183,10 @@ static void vTaskTaskUserIF(void *pvParameters)
     while(1)
     {
      
-      
-      // HAL_UART_Receive(&husart_debug,aRxBuffer,8,0xffff);
-	
-		HAL_UART_Receive(&husart_usart3,DMAaRxBuffer,8,0xffff);
-			//HAL_UART_Receive_DMA(&husartx,DMAaRxBuffer,8);
+        HAL_UART_Receive(&husart_usart3,DMAaRxBuffer,8,0xff);
 	    printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
 		printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
-       
-		printf("DMA USART3 serial \n");
+      
       if(START_StateRead()==KEY_DOWN)//if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
       {
         printf("=================================================\r\n");
@@ -204,8 +199,8 @@ static void vTaskTaskUserIF(void *pvParameters)
         printf("%s\r\n", pcWriteBuffer);
         //Key_AccessTimes(&key1,KEY_ACCESS_WRITE_CLEAR);
       }
-      if(DIR_StateRead()==KEY_DOWN)
-     //if(aRxBuffer[0]==0xa6)////if(Key_AccessTimes(&key2,KEY_ACCESS_READ)!=0)//按键被按下过
+     // if(DIR_StateRead()==KEY_DOWN)
+     if(DMAaRxBuffer[0]==0xa6)////if(Key_AccessTimes(&key2,KEY_ACCESS_READ)!=0)//按键被按下过
       {         
        // printf("KEY2按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
 		  
@@ -225,7 +220,7 @@ static void vTaskTaskUserIF(void *pvParameters)
 	  ptMsg->ulData[5]=DMAaRxBuffer[5];
 	  ptMsg->ulData[6]=DMAaRxBuffer[6];
 	  ptMsg->ulData[7]=DMAaRxBuffer[7];
-      ptMsg->usData[3]=aRxBuffer[3];;
+    
 		 /* 向消息队列发数据 */
        xQueueSendFromISR(xQueue1,
                   (void *)&ptMsg,
@@ -268,9 +263,10 @@ static void vTaskTaskUserIF(void *pvParameters)
 			  xQueueSendFromISR(xQueue1,
 					  (void *)&g_uiCount,
 					  &xHigherPriorityTaskWoken);
+			 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
 			 /* 如果xHigherPriorityTaskWoken = pdTRUE，那么退出中断后切到当前最高优先级任务执行 */
-			 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+			 //portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 			//HAL_TIM_OC_Start_IT(&htim2,TIM_CHANNEL_2);
 			 //Key_AccessTimes(&key3,KEY_ACCESS_WRITE_CLEAR);
          
@@ -346,18 +342,29 @@ static void vTaskLED1(void *pvParameters)
 
 static void vTaskLED2(void *pvParameters)
 {
- 
+    MSG_T *ptMsg;
+	BaseType_t xResult;
+	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(200); /* 设置最大等待时间为200ms */
+    
   while(1)
   {
-     printf("This is vTaskLED2 \n");
-	  
+        xResult = xQueueReceive(xQueue1,                   /* 消息队列句柄 */
+                            (void *)&ptMsg,  		   /* 这里获取的是结构体的地址 */
+                            (TickType_t)xMaxBlockTime);/* 设置阻塞时间 */
+      
+    if(xResult == pdPASS)
+    {
+      printf("This is vTaskLED2 \n");
+	
 	 /* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
        即当输入为3.3V时，AD转换结果为4096 */
        ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
 		printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
 		printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
    
-	  vTaskDelay(200);
+	  
+    }
+    vTaskDelay(200);
   }
 }
 
@@ -418,7 +425,7 @@ static void AppTaskCreate (void)
 
     xTaskCreate( vTaskTaskUserIF,   	/* 任务函数  */
                  "vTaskUserIF",     	/* 任务名    */
-                 4096,               	/* 任务栈大小，单位word，也就是4字节 */
+                 1024,               	/* 任务栈大小，单位word，也就是4字节 */
                  NULL,              	/* 任务参数  */
                  1,                 	/* 任务优先级*/
                  &xHandleTaskUserIF );  /* 任务句柄  */
@@ -427,7 +434,7 @@ static void AppTaskCreate (void)
                  "vTaskLED1",     	  /* 任务名    */
                  512,                /* 任务栈大小，单位word，也就是4字节 ,512*/
                  NULL,              	/* 任务参数  */
-                 2,                 	/* 任务优先级*/
+                 2,                 	/* 任务优先级,小-低*/
                  &xHandleTaskLED1 );  /* 任务句柄  */
 	
 	
@@ -440,7 +447,7 @@ static void AppTaskCreate (void)
 	
 	xTaskCreate( vTaskLED3,     		    /* 任务函数  */
                  "vTaskLED3",   		  /* 任务名    */
-                 512,             		/* 任务栈大小，单位word，也就是4字节 */
+                 2048,             		/* 任务栈大小，单位word，也就是4字节 */
                  NULL,           		  /* 任务参数  */
                  4,               		/* 任务优先级*/
                  &xHandleTaskLED3 );  /* 任务句柄  */

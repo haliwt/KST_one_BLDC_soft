@@ -58,101 +58,28 @@ extern TIM_HandleTypeDef htim2;
 /**
 * @brief This function handles Non maskable interrupt.
 */
-void NMI_Handler(void)
-{
-  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
-
-  /* USER CODE END NonMaskableInt_IRQn 0 */
-  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-
-  /* USER CODE END NonMaskableInt_IRQn 1 */
-}
 
 /**
 * @brief This function handles Hard fault interrupt.
 */
-void HardFault_Handler(void)
-{
-  /* USER CODE BEGIN HardFault_IRQn 0 */
-#if 1
-  const char *pError = ERR_INFO;
-  uint8_t i;
 
-  for (i = 0; i < sizeof(ERR_INFO); i++)
-  {
-     USART1->DR = pError[i];
-     /* µÈ´ý·¢ËÍ½áÊø */
-     while ((USART1->SR & UART_FLAG_TC) == (uint16_t)RESET);
-  }
-#endif	
-  /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
-  }
-  
-}
+
 
 /**
 * @brief This function handles Memory management fault.
 */
-void MemManage_Handler(void)
-{
-  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-
-  /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
-  }
-  /* USER CODE BEGIN MemoryManagement_IRQn 1 */
-
-  /* USER CODE END MemoryManagement_IRQn 1 */
-}
 
 /**
 * @brief This function handles Pre-fetch fault, memory access fault.
-*/
-void BusFault_Handler(void)
-{
-  /* USER CODE BEGIN BusFault_IRQn 0 */
-
-  /* USER CODE END BusFault_IRQn 0 */
-  while (1)
-  {
-  }
-  /* USER CODE BEGIN BusFault_IRQn 1 */
-
-  /* USER CODE END BusFault_IRQn 1 */
-}
 
 /**
 * @brief This function handles Undefined instruction or illegal state.
 */
-void UsageFault_Handler(void)
-{
-  /* USER CODE BEGIN UsageFault_IRQn 0 */
-
-  /* USER CODE END UsageFault_IRQn 0 */
-  while (1)
-  {
-  }
-  /* USER CODE BEGIN UsageFault_IRQn 1 */
-
-  /* USER CODE END UsageFault_IRQn 1 */
-}
 
 
 /**
 * @brief This function handles Debug monitor.
-*/
-void DebugMon_Handler(void)
-{
-  /* USER CODE BEGIN DebugMonitor_IRQn 0 */
 
-  /* USER CODE END DebugMonitor_IRQn 0 */
-  /* USER CODE BEGIN DebugMonitor_IRQn 1 */
-
-  /* USER CODE END DebugMonitor_IRQn 1 */
-}
 
 
 /**
@@ -180,35 +107,11 @@ void SysTick_Handler(void)
 /**
 * @brief This function handles RCC global interrupt.
 */
-void RCC_IRQHandler(void)
-{
-  /* USER CODE BEGIN RCC_IRQn 0 */
-
-  /* USER CODE END RCC_IRQn 0 */
-  /* USER CODE BEGIN RCC_IRQn 1 */
-
-  /* USER CODE END RCC_IRQn 1 */
-}
 
 /* USER CODE BEGIN 1 */
 /* USER CODE BEGIN 1 */
-void TIM6_DAC_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM6_IRQn 0 */
 
-  /* USER CODE END TIM6_IRQn 0 */
-  // HAL_TIM_IRQHandler(&htim1);
-  /* USER CODE BEGIN TIM6_IRQn 1 */
 
-  /* USER CODE END TIM6_IRQn 1 */
-}
-
-void TIM2_IRQHandler(void)
-{
-  
-  //HAL_TIM_IRQHandler(&htim2);
-  
-}
 extern __IO uint8_t MSG ;
 #if 0
 void SysTick_Handler(void)
@@ -239,6 +142,13 @@ void TIM1_TRG_COM_TIM11_IRQHandler(void)
 void TIM4_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&htimx_HALL);
+}
+
+void ADCx_DMA_IRQx_Handler(void)
+{
+ 
+  HAL_DMA_IRQHandler(&hdma_adcx);
+ 
 }
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
