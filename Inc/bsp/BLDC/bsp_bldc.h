@@ -94,6 +94,7 @@ extern __IO int32_t  uwStep ;
 extern __IO uint32_t Lock_Time; // 堵转时间
 extern __IO float   PWM_Duty;
 extern __IO int32_t Dir;
+
 /* 函数声明 ------------------------------------------------------------------*/
 void HALL_TIMx_Init(void);
 void BLDCMOTOR_TIMx_Init(void);

@@ -166,45 +166,39 @@ int main(void)
   * 返 回 值: 无
   * 说    明: 无
   */
-//static uint8_t g_uiCount[8] = 0; /* 设置为全局静态变量，方便数据更新 */
+static uint32_t g_uiCount = 0; /* 设置为全局静态变量，方便数据更新 */
 static void vTaskTaskUserIF(void *pvParameters)
 {
- 
-
-    uint8_t g_uiCount;
-    MSG_T   *ptMsg;
-	uint8_t ucCount = 0;
-	uint8_t ucKeyCode;
-	uint8_t pcWriteBuffer[500];
-	
-	/* 初始化结构体指针 */
-	ptMsg = &g_tMsg;
-	
-	/* 初始化数组 */
-	ptMsg->ucMessageID = 0;
-	ptMsg->ulData[0] = 0;
-	ptMsg->usData[0] = 0;
+ //  uint8_t pcWriteBuffer[500];
+      MSG_T   *ptMsg;
+      BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+      
+      /* 初始化结构体指针 */
+      ptMsg = &g_tMsg;
+      
+      /* 初始化数组 */
+      ptMsg->ucMessageID++;
+      ptMsg->ulData[0]++;
+      ptMsg->usData[0]++;
+    /* 创建按键 */
     KeyCreate(&key1,GetPinStateOfKey1);
 	KeyCreate(&key2,GetPinStateOfKey2);
 	KeyCreate(&key3,GetPinStateOfKey3);
-    KeyCreate(&key4,GetPinStateOfKey4);
- 
  
   printf("KEY1、KEY2和KEY3对应不同任务情况\n");
-
-    while(1)
+ while(1)
     {
+      Key_RefreshState(&key1);//刷新按键状态
+      Key_RefreshState(&key2);//刷新按键状态
+      Key_RefreshState(&key3);//刷新按键状态
+    //   HAL_UART_Receive(&husart_usart3,DMAaRxBuffer,8,0xffff);
+			//HAL_UART_Receive_DMA(&husartx,DMAaRxBuffer,8);
+	//    printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
+	//	printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
       
-       Key_RefreshState(&key1);//刷新按键状态
-       Key_RefreshState(&key2);
-	   Key_RefreshState(&key3);
-       Key_RefreshState(&key4);
-        HAL_UART_Receive(&husart_usart3,DMAaRxBuffer,8,0xff);
-	    printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
-		printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]);
-      #if 0
-      if(Key_AccessTimes(&key4,KEY_ACCESS_READ)!=0)//按键被按下过
+      if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
       {
+        #if 0
         printf("=================================================\r\n");
         printf("任务名      任务状态 优先级   剩余栈 任务序号\r\n");
         vTaskList((char *)&pcWriteBuffer);
@@ -212,92 +206,58 @@ static void vTaskTaskUserIF(void *pvParameters)
        
         printf("\r\n任务名       运行计数         使用率\r\n");
         vTaskGetRunTimeStats((char *)&pcWriteBuffer);
+       
         printf("%s\r\n", pcWriteBuffer);
-        //Key_AccessTimes(&key1,KEY_ACCESS_WRITE_CLEAR);
-      }
-   #endif 
-    if(Key_AccessTimes(&key1,KEY_ACCESS_READ)!=0)//按键被按下过
-      {         
-       // printf("KEY2按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
-		  
-	     MSG_T   *ptMsg;
-       BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-      
-      /* 初始化结构体指针 */
-      ptMsg = &g_tMsg;
-      
-      /* 初始化数组 */
-      
-      ptMsg->ulData[0]=DMAaRxBuffer[0];
-	  ptMsg->ulData[1]=DMAaRxBuffer[1];
-	  ptMsg->ulData[2]=DMAaRxBuffer[2];
-	  ptMsg->ulData[3]=DMAaRxBuffer[3];
-	  ptMsg->ulData[4]=DMAaRxBuffer[4];
-	  ptMsg->ulData[5]=DMAaRxBuffer[5];
-	  ptMsg->ulData[6]=DMAaRxBuffer[6];
-	  ptMsg->ulData[7]=DMAaRxBuffer[7];
-    
-		 /* 向消息队列发数据 */
-       xQueueSendFromISR(xQueue2,
-                  (void *)&ptMsg,
-                   &xHigherPriorityTaskWoken);  
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-       
-       
-     
-        Key_AccessTimes(&key1,KEY_ACCESS_WRITE_CLEAR);
-	 
-      }
-      
-     if(Key_AccessTimes(&key2,KEY_ACCESS_READ)!=0)//按键被按下过
-      {         
-          printf("KEY2按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
-		   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-        
-         g_uiCount ++;
-       
-			
-			  /* 向消息队列发数据 */
-			     xQueueSendFromISR(xQueue1,
-					  (void *)&g_uiCount,
-					  &xHigherPriorityTaskWoken);
-
-			 /* 如果xHigherPriorityTaskWoken = pdTRUE，那么退出中断后切到当前最高优先级任务执行 */
-           portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-           //HAL_TIM_OC_Start_IT(&htim2,TIM_CHANNEL_2);
-            Key_AccessTimes(&key2,KEY_ACCESS_WRITE_CLEAR);	
-		
-		}
-		if(Key_AccessTimes(&key3,KEY_ACCESS_READ)!=0)//按键被按下过
-		 {
-		       
-		printf("KEY3按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
-		   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-      
+        #endif 
            
-           /* 初始化结构体指针 */
-            ptMsg = &g_tMsg;
+         printf("KEY1按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
+		  
+	 
+		 /* 向消息队列发数据 */
+        xQueueSendFromISR(xQueue3,
+                  (void *)&ptMsg,
+                   &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        Key_AccessTimes(&key1,KEY_ACCESS_WRITE_CLEAR);
+      }
       
-            ptMsg->ulData[0]=DMAaRxBuffer[0];
+      if(Key_AccessTimes(&key2,KEY_ACCESS_READ)!=0)//按键被按下过
+      {         
+        printf("KEY2按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
+		  
+	  
+		 /* 向消息队列发数据 */
+        xQueueSendFromISR(xQueue2,
+                  (void *)&ptMsg,
+                   &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        Key_AccessTimes(&key2,KEY_ACCESS_WRITE_CLEAR);
+		  }
+      
+      if(Key_AccessTimes(&key3,KEY_ACCESS_READ)!=0)//按键被按下过
+      {         
+        printf("KEY3按下，启动单次定时器中断，50ms后在定时器中断给任务vTaskMsgPro发送消息\r\n");
+		   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+      
+         g_uiCount++;
       
 		  /* 向消息队列发数据 */
-           xQueueSendFromISR(xQueue3,
-                            (void *)&ptMsg,
-                             &xHigherPriorityTaskWoken);
+        xQueueSendFromISR(xQueue1,
+                  (void *)&g_uiCount,
+                  &xHigherPriorityTaskWoken);
 
       /* 如果xHigherPriorityTaskWoken = pdTRUE，那么退出中断后切到当前最高优先级任务执行 */
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+      portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         //HAL_TIM_OC_Start_IT(&htim2,TIM_CHANNEL_2);
         Key_AccessTimes(&key3,KEY_ACCESS_WRITE_CLEAR);
-			 
+		}
          
-           }
-      
-      vTaskDelay(10);
-    }
+     vTaskDelay(20);
+
+    
 	 
  }
-
+}
 
 /********************************************************
   *
@@ -328,7 +288,7 @@ static void vTaskLED1(void *pvParameters)
 	
 		  //HAL_Delay(500);
 		
-	   printf("--------------------This is vTaskLED1 --------------\n");	
+	  printf("--------------------This is vTaskLED1 --------------\n");	
       printf("vTaskLED1 ptMsg->ucMessageID = %#x\r\n", ptMsg->ucMessageID);
       printf("接收到消息队列数据ptMsg->ulData[0] = %#x\r\n", ptMsg->ulData[0]);
 	  printf("接收到消息队列数据ptMsg->ulData[1] = %#x\r\n", ptMsg->ulData[1]);
@@ -385,7 +345,7 @@ static void vTaskLED2(void *pvParameters)
    
 	  
     }
-    vTaskDelay(10);
+    
   }
 }
 
@@ -399,7 +359,7 @@ static void vTaskMotorStart3(void *pvParameters)
 {
     MSG_T *ptMsg;
 	BaseType_t xResult;
-	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(200); /* 设置最大等待时间为200ms */
+	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(50); /* 设置最大等待时间为200ms */
 	
     while(1)
     {
@@ -411,19 +371,11 @@ static void vTaskMotorStart3(void *pvParameters)
     if(xResult == pdPASS)
     {
         
-        printf("Motor Start run \n"); 
-       // taskENTER_CRITICAL();  
-           /* 使能电机 */
-   
-        Enable_BLDC();
-      /* 先以恒定的转空比启动,然后再来调速 */
-//      BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
-//      HAL_Delay(100);
-         start_flag  = 1;
-         IS_EnableMotor = 1;
-         LED2_OFF;
-        // taskEXIT_CRITICAL();
+        printf("Motor DIR  \n"); 
+        Dir = -Dir;
+
      
+        
       }
     #if 0
         /* 电机换向 */
@@ -447,7 +399,7 @@ static void vTaskMotorStart3(void *pvParameters)
   #endif 
              
         
-       vTaskDelay(100);
+      
  }
  
 }
@@ -463,11 +415,21 @@ static void vTaskMotorStop4(void *pvParameters)
 	
 	while(1)
     {
-     
-      LED1_TOGGLE;
-      LED2_TOGGLE;
-    
-     vTaskDelay(100);
+       
+        //taskENTER_CRITICAL();  
+           /* 使能电机 */
+   
+        Enable_BLDC();
+      /* 先以恒定的转空比启动,然后再来调速 */
+//      BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
+//      HAL_Delay(100);
+         start_flag  = 1;
+         IS_EnableMotor = 1;
+         LED2_OFF;
+       // taskEXIT_CRITICAL();
+      
+    vTaskDelay(200);
+        
      }
  }
 
@@ -486,7 +448,7 @@ static void AppTaskCreate (void)
 
     xTaskCreate( vTaskTaskUserIF,   	/* 任务函数  */
                  "vTaskUserIF",     	/* 任务名    */
-                 1024,               	/* 任务栈大小，单位word，也就是4字节 */
+                 512,               	/* 任务栈大小，单位word，也就是4字节 */
                  NULL,              	/* 任务参数  */
                  1,                 	/* 任务优先级*/
                  &xHandleTaskUserIF );  /* 任务句柄  */
@@ -501,7 +463,7 @@ static void AppTaskCreate (void)
 	
 	xTaskCreate( vTaskLED2,    		      /* 任务函数  */
                  "vTaskLED2",  		    /* 任务名    */
-                 1024,         		    /* 任务栈大小，单位word，也就是4字节 */
+                 512,         		    /* 任务栈大小，单位word，也就是4字节 */
                  NULL,        		    /* 任务参数  */
                  3,           		    /* 任务优先级*/
                  &xHandleTaskLED2 );  /* 任务句柄  */
@@ -535,7 +497,7 @@ static void AppObjCreate (void)
 	xQueue1 = xQueueCreate(10, sizeof(uint8_t));
     if( xQueue1 == 0 )
     {
-        /* 没有创建成功，用户可以在这里加入创建失败的处理机制 */
+        printf("Thisi create is xQueue1 fail \n") ;/* 没有创建成功，用户可以在这里加入创建失败的处理机制 */
     }
 	
 	/* 创建10个存储指针变量的消息队列，由于CM3/CM4内核是32位机，一个指针变量占用4个字节 */

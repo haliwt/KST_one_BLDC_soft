@@ -272,12 +272,14 @@ void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim)
 {
   /* 获取霍尔传感器引脚状态,作为换相的依据 */
   BLDCMotor.uwStep = HallSensor_GetPinState();
+#if 1
    __IO uint32_t tmp = 0;
   uwStep = HallSensor_GetPinState();
   if(Dir == CW)
   {
     uwStep = (uint32_t)7 - uwStep;        // 根据顺序表的规律 CW = 7 - CCW;
   }
+#endif 
 #if 0
   if( PWM_ChangeFlag == 1)
   {
@@ -298,7 +300,7 @@ void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim)
     
   }
   
-#endif   
+#endif    
   /*---- 定义定时器OC1为A(U)相 OC2为B(V)相，OC3为C(W)相 ---- */
   /*---- 定义uWStep低3位为霍尔传感器引脚状态,IC1(001,U),IC2(010,V),IC3(100,W) ----*/
   switch(uwStep)//switch(BLDCMotor.uwStep)

@@ -150,5 +150,6 @@ void ADCx_DMA_IRQx_Handler(void)
   HAL_DMA_IRQHandler(&hdma_adcx);
  
 }
+
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
