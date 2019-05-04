@@ -411,7 +411,11 @@ static void vTaskMotorStart3(void *pvParameters)
  ***************************************************/
 static void vTaskMotorStop4(void *pvParameters)
 {
-   
+   TickType_t xLastWakeTime;
+  const TickType_t xFrequency = 300;
+
+  /* 获取当前的系统时间 */
+  xLastWakeTime = xTaskGetTickCount();
 	
 	while(1)
     {
@@ -428,7 +432,7 @@ static void vTaskMotorStop4(void *pvParameters)
          LED2_OFF;
        // taskEXIT_CRITICAL();
       
-    vTaskDelay(200);
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
         
      }
  }
