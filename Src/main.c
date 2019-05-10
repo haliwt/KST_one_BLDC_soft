@@ -7,6 +7,7 @@
 #include "key/bsp_key.h"
 #include "led/bsp_led.h"
 #include "usart/bsp_usartx.h"
+#include "adc/bsp_adc.h"
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
 /* 私有变量 ------------------------------------------------------------------*/
@@ -16,7 +17,9 @@ int32_t  start_flag = 0;
 
 uint8_t DMAaRxBuffer[8];                      // 接收数据 
 uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
-
+// 用于保存转换计算后的电压值	 
+float ADC_ConvertedValueLocal;
+uint32_t ADC_ConvertedValue;
 
 /* 函数体 --------------------------------------------------------------------*/
 /**
@@ -84,6 +87,8 @@ int main(void)
   /* 初始化指示灯 */
   LED_GPIO_Init();
   /* 初始化霍尔传感器接口 */
+    
+ 
   HALL_TIMx_Init();
   /* 初始化定时器各通道输出 */
   BLDCMOTOR_TIMx_Init();
@@ -91,17 +96,21 @@ int main(void)
   HAL_TIM_Base_Start(&htimx_BLDC);  
   /* 初始化串口功能 */
   MX_USARTx_Init();
+    
+  MX_DMA_Init();
+  /* ADC 初始化 */
+  MX_ADCx_Init();
+
+  /* 启动AD转换并使能DMA传输和中断 */
+  HAL_ADC_Start_DMA(&hadcx,&ADC_ConvertedValue,1);  
+  
  
   while (1)
   {
-     
-      HAL_UART_Receive(&husartx,DMAaRxBuffer,8,0xffff);
-		
-	   printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
-	   printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]); 
-       printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[2]);
-	   printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[3]); 
-     key=KEY_Scan(0);            //按键扫描
+      key=KEY_Scan(0); 
+      
+           
+               //按键扫描
      switch(key)
      {
          case KEY0_PRES :
@@ -125,6 +134,24 @@ int main(void)
               Dir = -Dir;
               LED1_ON;
              
+             break;
+         case KEY3_PRES :
+              HAL_Delay(100); 
+            ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+            HAL_Delay(100); 
+		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
+		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
+     
+            
+        //   HAL_UART_Receive(&husartx,DMAaRxBuffer,8,0xff);
+		
+	   //  printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
+	   //  printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]); 
+       //  printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[2]);
+	   //  printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[3]); 
+                    
+            LED1_OFF;
+            LED2_OFF;
              break;
      
      }

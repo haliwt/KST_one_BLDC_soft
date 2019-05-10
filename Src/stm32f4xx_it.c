@@ -38,7 +38,7 @@
 /* USER CODE BEGIN 0 */
 #include "bldc/bsp_bldc.h" 
 /* USER CODE END 0 */
-
+#include "adc/bsp_adc.h"
 /* External variables --------------------------------------------------------*/
 
 /******************************************************************************/
@@ -199,7 +199,14 @@ void TIM4_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&htimx_HALL);
 }
-
+#if 0
+void ADCx_DMA_IRQx_Handler(void)
+{
+ 
+  HAL_DMA_IRQHandler(&hdma_adcx);
+ 
+}
+#endif 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

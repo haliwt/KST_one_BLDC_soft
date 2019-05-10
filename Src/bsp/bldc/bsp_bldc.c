@@ -1,19 +1,4 @@
-/**
-  ******************************************************************************
-  * 文件名程: bsp_STEPMOTOR.c 
-  * 作    者: 硬石嵌入式开发团队
-  * 版    本: V1.0
-  * 编写日期: 2017-05-31
-  * 功    能: 57&42步进电机基本旋转实现
-  ******************************************************************************
-  * 说明：
-  * 本例程配套硬石stm32开发板YS-F1Pro使用。
-  * 
-  * 淘宝：
-  * 论坛：http://www.ing10bbs.com
-  * 版权归硬石嵌入式开发团队所有，请勿商用。
-  ******************************************************************************
-  */
+
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "bldc/bsp_bldc.h" 
 #include "main.h"
@@ -203,7 +188,7 @@ void HALL_TIMx_Init(void)
   sHallSensorConfig.Commutation_Delay = 0U;             // 0 ,不使用延迟触发
   HAL_TIMEx_HallSensor_Init(&htimx_HALL,&sHallSensorConfig);
   
-  HAL_NVIC_SetPriority(HALL_TIM_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(HALL_TIM_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(HALL_TIM_IRQn);
 }
 
