@@ -8,6 +8,7 @@
 #include "led/bsp_led.h"
 #include "usart/bsp_usartx.h"
 #include "adc/bsp_adc.h"
+#include "CAN/bsp_CAN.h"
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
 /* 私有变量 ------------------------------------------------------------------*/
@@ -20,6 +21,15 @@ uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
 // 用于保存转换计算后的电压值	 
 float ADC_ConvertedValueLocal;
 uint32_t ADC_ConvertedValue;
+void CAN_SetTxMsg(void)
+{						 
+  hCAN.pTxMsg->ExtId=0x1314;					   /* 使用的扩展ID */
+  hCAN.pTxMsg->IDE=CAN_ID_EXT;					 /* 扩展模式 */
+  hCAN.pTxMsg->RTR=CAN_RTR_DATA;				 /* 发送的是数据 */
+  hCAN.pTxMsg->DLC=2;							       /* 数据长度为2字节 */
+  hCAN.pTxMsg->Data[0]=0xAB;
+  hCAN.pTxMsg->Data[1]=0xCD;
+}
 
 /* 函数体 --------------------------------------------------------------------*/
 /**
@@ -88,15 +98,16 @@ int main(void)
   LED_GPIO_Init();
   /* 初始化霍尔传感器接口 */
     
- 
+  /* 初始化串口并配置串口中断优先级 */
+  MX_USARTx_Init();
+  
   HALL_TIMx_Init();
   /* 初始化定时器各通道输出 */
   BLDCMOTOR_TIMx_Init();
   /* 启动定时器 */
   HAL_TIM_Base_Start(&htimx_BLDC);  
   /* 初始化串口功能 */
-  MX_USARTx_Init();
-    
+
   MX_DMA_Init();
   /* ADC 初始化 */
   MX_ADCx_Init();
@@ -104,11 +115,21 @@ int main(void)
   /* 启动AD转换并使能DMA传输和中断 */
   HAL_ADC_Start_DMA(&hadcx,&ADC_ConvertedValue,1);  
   
+   MX_CAN_Init();
+  CAN_SetTxMsg();
+  
+  //HAL_CAN_Receive_IT(&hCAN, CAN_FIFO0); 
+  
  
   while (1)
   {
-      key=KEY_Scan(0); 
       
+      
+       
+     key=KEY_Scan(0); 
+     //HAL_CAN_Receive_IT(&hCAN, CAN_FIFO0); 
+     HAL_CAN_Receive(&hCAN,CAN_FIFO0,0xff);
+    
            
                //按键扫描
      switch(key)
@@ -136,25 +157,21 @@ int main(void)
              
              break;
          case KEY3_PRES :
-              HAL_Delay(100); 
+           
             ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
-            HAL_Delay(100); 
+            HAL_Delay(10); 
 		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
 		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
-     
             
-        //   HAL_UART_Receive(&husartx,DMAaRxBuffer,8,0xff);
-		
-	   //  printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[0]);
-	   //  printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[1]); 
-       //  printf("DMAaRxBuffer[0]=%#x \n",DMAaRxBuffer[2]);
-	   //  printf("DMAaRxBuffer[1]=%#x \n",DMAaRxBuffer[3]); 
-                    
+          //  HAL_UART_Receive(&husartx,DMAaRxBuffer,8,0XFF);
+          //  HAL_UART_Transmit(&husartx,DMAaRxBuffer,8,0XFF);
+            
             LED1_OFF;
             LED2_OFF;
              break;
      
      }
+     
  
   }
 }
@@ -179,4 +196,20 @@ void HAL_SYSTICK_Callback()
       BLDCMotor.Lock_Time = 0;//Lock_Time = 0;
     }
   }
+}
+/**
+  * 函数功能: CAN接收完成中断回调服务程序
+  * 输入参数: hcan：CAN外设句柄指针
+  * 返 回 值: 无
+  * 说    明：无
+  */
+void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
+{
+  printf( "\n成功接收到“从机”返回的数据\n ");	
+	printf("接收到的报文为：\n"); 
+	printf("》扩展ID号ExtId：0x%x\n",hCAN.pRxMsg->ExtId);
+  printf("》接收到数据段长度：%d\n",hCAN.pRxMsg->DLC);
+	printf("》数据段的内容:Data[0]= 0x%X ，Data[1]=0x%X \n",hCAN.pRxMsg->Data[0],hCAN.pRxMsg->Data[1]);
+	
+  HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
