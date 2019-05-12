@@ -39,12 +39,14 @@
 #include "bldc/bsp_bldc.h" 
 /* USER CODE END 0 */
 #include "adc/bsp_adc.h"
+#include "CAN/bsp_CAN.h"
 /* External variables --------------------------------------------------------*/
 
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
-
+extern UART_HandleTypeDef husartx;
+extern DMA_HandleTypeDef hdma_usartx_tx;
 /**
 * @brief This function handles Non maskable interrupt.
 */
@@ -207,6 +209,29 @@ void ADCx_DMA_IRQx_Handler(void)
  
 }
 #endif 
+
+/* USER CODE BEGIN 1 */
+void CAN1_RX0_IRQHandler(void)
+{
+  /* USER CODE BEGIN USB_LP_CAN1_RX0_IRQn 0 */
+
+  /* USER CODE END USB_LP_CAN1_RX0_IRQn 0 */
+  HAL_CAN_IRQHandler(&hCAN);
+  /* USER CODE BEGIN USB_LP_CAN1_RX0_IRQn 1 */
+
+  /* USER CODE END USB_LP_CAN1_RX0_IRQn 1 */
+}
+/* USER CODE BEGIN 1 */
+void USARTx_DMAx_CHANNELn_IRQHANDLER(void)
+{
+  /* USER CODE BEGIN DMA2_Stream7_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usartx_tx);
+  /* USER CODE BEGIN DMA2_Stream7_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream7_IRQn 1 */
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

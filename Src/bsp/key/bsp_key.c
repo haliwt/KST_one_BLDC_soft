@@ -1,19 +1,4 @@
-/**
-  ******************************************************************************
-  * 文件名程: bsp_key.c 
-  * 作    者: 硬石嵌入式开发团队
-  * 版    本: V1.0
-  * 编写日期: 2017-05-31
-  * 功    能: 板载独立按键底层驱动函数
-  ******************************************************************************
-  * 说明：
-  * 本例程配套硬石stm32开发板YS-F1Pro使用。
-  * 
-  * 淘宝：
-  * 论坛：http://www.ing10bbs.com
-  * 版权归硬石嵌入式开发团队所有，请勿商用。
-  ******************************************************************************
-  */
+
 
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "key/bsp_key.h"
@@ -38,8 +23,8 @@ void KEY_Init(void)
     GPIO_InitTypeDef GPIO_Initure;
     
     __HAL_RCC_GPIOB_CLK_ENABLE();           //开启GPIOA时钟
-    __HAL_RCC_GPIOC_CLK_ENABLE();           //开启GPIOE时钟
-
+    __HAL_RCC_GPIOC_CLK_ENABLE();     //开启GPIOE时钟
+    __HAL_RCC_GPIOA_CLK_ENABLE(); 
     
     GPIO_Initure.Pin=GPIO_PIN_4|GPIO_PIN_5;            //PC4
     GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
@@ -47,11 +32,24 @@ void KEY_Init(void)
     GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
     HAL_GPIO_Init(GPIOC,&GPIO_Initure);
     
-	GPIO_Initure.Pin=GPIO_PIN_0|GPIO_PIN_1; //PB0 1
+	GPIO_Initure.Pin=GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_10|GPIO_PIN_12
+		              |GPIO_PIN_14; //PB0 1
     GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
     GPIO_Initure.Pull=GPIO_PULLUP;          //上拉
     GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
     HAL_GPIO_Init(GPIOB,&GPIO_Initure);
+    
+    GPIO_Initure.Pin=GPIO_PIN_4|GPIO_PIN_2|GPIO_PIN_3;            //PA 4
+    GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
+    GPIO_Initure.Pull=GPIO_PULLUP;          //上拉
+    GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
+    HAL_GPIO_Init(GPIOA,&GPIO_Initure);
+
+	GPIO_Initure.Pin=GPIO_PIN_8;            //PC4
+    GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
+    GPIO_Initure.Pull=GPIO_PULLUP;        //下拉
+    GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
+    HAL_GPIO_Init(GPIOD,&GPIO_Initure);
     
 }
 
@@ -65,14 +63,24 @@ uint8_t KEY_Scan(uint8_t mode)
 {
     static uint8_t key_up=1;     //按键松开标志
     if(mode==1)key_up=1;    //支持连按
-    if(key_up&&(KEY0==0||KEY1==0||KEY2==0||KEY3==0))
+    if(key_up&&(START==0||BRAKE==0||KEY2==0
+        ||KEY3==0||WIPE==0||AIR==0)||CAR_DOOR==0
+        ||PUMP==0||TURN_LIGHT==0||HALL_SW==0||GLOBAL==0)
     {
         HAL_Delay(10);
         key_up=0;
-        if(KEY0==0)       return KEY0_PRES;
-        else if(KEY1==0)  return KEY1_PRES;
-        else if(KEY2==0)  return KEY2_PRES;
-        else if(KEY3==0)  return KEY3_PRES;          
-    }else if(KEY0==1&&KEY1==1&&KEY2==1&&KEY3==1)key_up=1;
+        if(START==0)              return  START_PRES;
+        else if(BRAKE==0)         return  BRAKE_PRES;
+        else if(KEY2==0)          return  KEY2_PRES;
+        else if(KEY3==0)          return  KEY3_PRES;  
+        else if(WIPE== 0)         return  WIPE_PRES;
+        else if(AIR== 0)          return  AIR_PRES;
+		else if(CAR_DOOR == 0)    return  CAR_DOOR_PRES;
+		else if(PUMP ==0 )        return  PUMP_PRES;
+		else if(TURN_LIGHT ==0)   return  TURN_LIGHT_PRES;
+		else if(HALL_SW==0)       return  HALL_SW_PRES ;
+		else if(GLOBAL==0)        return  GLOBAL_PRES;
+    }else if(START==1&&BRAKE==1&&KEY2==1&&KEY3==1&&WIPE==1&&AIR==1&&CAR_DOOR==1
+             &&PUMP==1 && TURN_LIGHT==1 && HALL_SW==1 && GLOBAL == 1)key_up=1;
     return 0;   //无按键按下
 }
