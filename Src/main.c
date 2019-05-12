@@ -126,7 +126,7 @@ int main(void)
      key=KEY_Scan(0); 
      //HAL_CAN_Receive_IT(&hCAN, CAN_FIFO0); 
      HAL_CAN_Receive(&hCAN,CAN_FIFO0,0xff);
-     LED1_OFF;
+     LED1_ON;
      LED2_OFF;
            
                //°´¼üÉ¨Ãè
@@ -204,7 +204,7 @@ int main(void)
 			  HAL_Delay(200);
 			  LED2_OFF;
 			  break;
-	     #if 0
+	     #if 1
 		  case HALL_SW_PRES :
 		  	  LED1_OFF;
              

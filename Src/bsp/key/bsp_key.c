@@ -25,6 +25,7 @@ void KEY_Init(void)
     __HAL_RCC_GPIOB_CLK_ENABLE();           //开启GPIOA时钟
     __HAL_RCC_GPIOC_CLK_ENABLE();     //开启GPIOE时钟
     __HAL_RCC_GPIOA_CLK_ENABLE(); 
+	 __HAL_RCC_GPIOD_CLK_ENABLE(); 
     
     GPIO_Initure.Pin=GPIO_PIN_4|GPIO_PIN_5;            //PC4
     GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
