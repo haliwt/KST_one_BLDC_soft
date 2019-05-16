@@ -128,6 +128,10 @@ int main(void)
      HAL_CAN_Receive(&hCAN,CAN_FIFO0,0xff);
      LED1_ON;
      LED2_OFF;
+	 ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+            HAL_Delay(10); 
+		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
+		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
            
                //按键扫描
      switch(key)
