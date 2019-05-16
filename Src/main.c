@@ -84,20 +84,7 @@ MSG_T   g_tMsg; /* 定义一个结构体用于消息队列 */
 extern __IO uint16_t CCR1_Val;
 
 
-//查询Message_Queue队列中的总队列数量和剩余队列数量
-void check_msg_queue(void)
-{
-    uint8_t *p;
-	uint8_t msgq_remain_size;	//消息队列剩余大小
-    uint8_t msgq_total_size;     //消息队列总大小
-    
-    taskENTER_CRITICAL();   //进入临界区
-    msgq_remain_size=uxQueueSpacesAvailable(Message_Queue);//得到队列剩余大小
-    msgq_total_size=uxQueueMessagesWaiting(Message_Queue)+uxQueueSpacesAvailable(Message_Queue);//得到队列总大小，总大小=使用+剩余的。
-	
-//	myfree(SRAMIN,p);		//释放内存
-    taskEXIT_CRITICAL();    //退出临界区
-}
+
 
 
 
@@ -228,7 +215,8 @@ void start_task(void *pvParameters)
                 (uint16_t       )KEYPROCESS_STK_SIZE,
                 (void*          )NULL,
                 (UBaseType_t    )KEYPROCESS_TASK_PRIO,
-                (TaskHandle_t*  )&Keyprocess_Handler); 
+                (TaskHandle_t*  )&Keyprocess_Handler);
+    
     vTaskDelete(StartTask_Handler); //删除开始任务
     taskEXIT_CRITICAL();            //退出临界区
 }
@@ -258,7 +246,6 @@ void task1_task(void *pvParameters)
             }
         }
         i++;
-        if(i%10==0) check_msg_queue();//检Message_Queue队列的容量
         if(i==50)
         {
             i=0;
@@ -279,7 +266,7 @@ void task1_task(void *pvParameters)
 ***************************************************************/
 void Keyprocess_task(void *pvParameters)
 {
-	uint8_t num,key,beepsta=1;
+	uint8_t key;
 	while(1)
 	{
         if(Key_Queue!=NULL)
@@ -289,119 +276,94 @@ void Keyprocess_task(void *pvParameters)
                 switch(key)
                 {
                     case START_PRES:		//KEY_UP控制LED1
+                          Enable_BLDC();
+                          /* 先以恒定的转空比启动,然后再来调速 */
+                         //BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
+                         //HAL_Delay(100);
+                         start_flag  = 1;
+                         IS_EnableMotor = 1;
                         LED1_TOGGLE;
                         break;
-                    case KEY2_PRES:		//KEY2控制蜂鸣器
-                        beepsta=!beepsta;
-                       // PCF8574_WriteBit(BEEP_IO,beepsta);
-                        break;
-                    case KEY3_PRES:		//KEY0刷新LCD背景
-                        num++;
-                        LED2_TOGGLE;
-                        break;
+                    case BRAKE_PRES:		//KEY2控制蜂鸣器
+                          start_flag = 0;
+                         Disable_BLDC();
+                         IS_EnableMotor = 0;  
+                         LED2_ON;        
+                         break;
+                  
+                   case KEY2_PRES : //方向键
+                          Dir = -Dir;
+                          LED1_ON;
+             
+                     break;
+                   case KEY3_PRES :
+                     ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+                    HAL_Delay(10); 
+                    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
+                    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
+                    
+                  //  HAL_UART_Receive(&husartx,DMAaRxBuffer,8,0XFF);
+                  //  HAL_UART_Transmit(&husartx,DMAaRxBuffer,8,0XFF);
+            
+                        LED1_OFF;
+                        LED2_OFF;
+                   break;
+         case WIPE_PRES:
+             
+             LED2_OFF;
+             HAL_Delay(500);
+             LED2_ON;
+         
+             break;
+         case AIR_PRES:
+             LED1_OFF;;
+             LED2_ON;;
+             HAL_Delay(500);
+             LED1_ON;;
+             LED2_OFF;;
+             break;
+		 case CAR_DOOR_PRES:
+             LED1_ON;
+			 HAL_Delay(200);
+             LED2_OFF;
+             HAL_Delay(200);
+             LED1_OFF;
+			 HAL_Delay(200);
+             LED2_ON; 
+		     break;
+         case PUMP_PRES:
+		 	 LED1_ON;
+             HAL_Delay(500);
+             LED1_OFF;
+             HAL_Delay(500);
+			 LED1_ON;
+			 break;
+		  case TURN_LIGHT_PRES:
+		  	  LED2_OFF;
+              HAL_Delay(200);
+              LED2_ON;
+			  HAL_Delay(200);
+			  LED2_OFF;
+			  break;
+          case GLOBAL_PRES :
+		  	  LED1_OFF;
+              LED2_OFF;
+              HAL_Delay(200);
+              LED1_ON;
+              LED2_ON;
+			  HAL_Delay(200);
+			  LED1_OFF;
+              LED2_OFF;
+		  	  break;
                 }
             }
         } 
 		vTaskDelay(10);      //延时10ms，也就是10个时钟节拍	
 	}
 }
-#if 0
-/**************************************************
-  * 函数功能: MotorStart3
-  * 输入参数: 无
-  * 返 回 值: 无
-  * 说    明: 无
- ***************************************************/
-static void vTaskMotorStart3(void *pvParameters)
-{
-    MSG_T *ptMsg;
-	BaseType_t xResult;
-	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(50); /* 设置最大等待时间为200ms */
-	
-    while(1)
-    {
-  
-     xResult = xQueueReceive(xQueue3,                   /* 消息队列句柄 */
-                          (void *)&ptMsg,  /* 存储接收到的数据到变量ucQueueMsgValue中 */
-                          (TickType_t)xMaxBlockTime);/* 设置阻塞时间 */
-  
-    if(xResult == pdPASS)
-    {
-        
-      printf("-------------------------------------------------\r\n");
-	  printf("=================vTaskMotorStart3================\r\n");
-      Dir = -Dir;
-
-     
-        
-      }
-    #if 0
-        /* 电机换向 */
-    if(Key_AccessTimes(&key2,KEY_ACCESS_READ)!=0)//按键被按下过
-    {
-      Dir = -Dir;
-      Key_AccessTimes(&key1,KEY_ACCESS_WRITE_CLEAR);
-    }
-    /* 电机停止 */
-    if(Key_AccessTimes(&key3,KEY_ACCESS_READ)!=0)//按键被按下过
-    {
-      
-      taskENTER_CRITICAL();   
-      start_flag = 0;
-      Disable_BLDC();
-      IS_EnableMotor = 0;  
-      taskEXIT_CRITICAL();  
-      Key_AccessTimes(&key1,KEY_ACCESS_WRITE_CLEAR);        
-     }
-             
-  #endif 
-             
-        
-      
- }
- 
-}
- 
-/**************************************************
-  * 函数功能: MotorStart3
-  * 输入参数: 无
-  * 返 回 值: 无
-  * 说    明: 无
- ***************************************************/
-static void vTaskMotorStop4(void *pvParameters)
-{
-  TickType_t xLastWakeTime;
-  const TickType_t xFrequency = 20;
- 
-
-  /* 获取当前的系统时间 */
-  xLastWakeTime = xTaskGetTickCount();
 
  
-	while(1)
-    {
-     /* 互斥信号量，xSemaphoreTake和xSemaphoreGive一定要成对的调用 */
-   // xSemaphoreTake(xMutex, portMAX_DELAY);
-   // printf("任务vTaskLED2在运行\r\n");
-       // taskENTER_CRITICAL();  
-           /* 使能电机 */
-   
-        Enable_BLDC();
-      /* 先以恒定的转空比启动,然后再来调速 */
-//      BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
-//      HAL_Delay(100);
-         start_flag  = 1;
-         IS_EnableMotor = 1;
-         LED2_OFF;
-      //  taskEXIT_CRITICAL();
-    // xSemaphoreGive(xMutex);
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
-        
-     }
- }
 
-
-#endif 
 
 void HAL_SYSTICK_Callback()
 {
