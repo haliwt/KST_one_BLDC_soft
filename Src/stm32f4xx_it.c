@@ -35,7 +35,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 #include "cmsis_os.h"
-#include "dma_usart3/bsp_usart3.h"
+#include "usart/bsp_usartx.h"
 /* USER CODE BEGIN 0 */
 #include "bldc/bsp_bldc.h" 
 /* USER CODE BEGIN 0 */
@@ -62,25 +62,6 @@ extern TIM_HandleTypeDef htim2;
 /**
 * @brief This function handles Hard fault interrupt.
 */
-
-
-
-/**
-* @brief This function handles Memory management fault.
-*/
-
-/**
-* @brief This function handles Pre-fetch fault, memory access fault.
-
-/**
-* @brief This function handles Undefined instruction or illegal state.
-*/
-
-
-/**
-* @brief This function handles Debug monitor.
-
-
 
 /**
 * @brief This function handles System tick timer.
@@ -150,6 +131,18 @@ void ADCx_DMA_IRQx_Handler(void)
   HAL_DMA_IRQHandler(&hdma_adcx);
  
 }
+#if 0
+/* USER CODE BEGIN 1 */
+void USARTx_DMAx_CHANNELn_IRQHANDLER(void)
+{
+  /* USER CODE BEGIN DMA2_Stream7_IRQn 0 */
 
+  /* USER CODE END DMA2_Stream7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usartx_tx);
+  /* USER CODE BEGIN DMA2_Stream7_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream7_IRQn 1 */
+}
+#endif 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
