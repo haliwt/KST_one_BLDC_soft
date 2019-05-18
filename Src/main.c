@@ -11,6 +11,7 @@
 #include "CAN/bsp_CAN.h"
 #include "output/bsp_output.h"
 #include "hallsw/bsp_hallsw.h"
+#include "exti/bsp_exti.h"
 
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
@@ -111,7 +112,7 @@ int main(void)
   /* 启动定时器 */
   HAL_TIM_Base_Start(&htimx_BLDC);  
   /* 初始化串口功能 */
-
+   EXTI_Init();                    //外部中断初始化
   MX_DMA_Init();
   /* ADC 初始化 */
   MX_ADCx_Init();
@@ -141,7 +142,7 @@ int main(void)
      switch(key)
      {
          case START_PRES :
-             Enable_BLDC();
+           Enable_BLDC();
           /* 先以恒定的转空比启动,然后再来调速 */
     //      BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
     //      HAL_Delay(100);
@@ -226,7 +227,7 @@ int main(void)
 			  LED1_OFF;
            
 		  	  break;
-	   
+	   #if 0
 	   case GLOBAL_PRES :
 		  	  LED1_OFF;
               LED2_OFF;
@@ -237,6 +238,7 @@ int main(void)
 			  LED1_OFF;
               LED2_OFF;
 		  	  break;
+       #endif 
        case SPEED_ADD_PRES:
               LED1_OFF;
               LED2_OFF;

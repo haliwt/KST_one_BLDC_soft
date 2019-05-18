@@ -15,7 +15,7 @@
 #define PUMP               HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_12)  //´òÆø±Ã
 #define TURN_LIGHT         HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14)  //×ªÏòµÆ
 #define HALL_SW            HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_9)   //»ô¶ûÐÅºÅÇÐ»»£¬ÇÐ»»³ÉÎÞ»ô¶û
-#define GLOBAL             HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)   //È«¾Ö¿ª¹   Ø 
+#define GLOBAL             HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_6)   //È«¾Ö¿ª¹ PE6
 #define SPEED_ADD          HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_11)   // speed add
 #define SPEED_REDUCE       HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_15)   //speed reduce
 
