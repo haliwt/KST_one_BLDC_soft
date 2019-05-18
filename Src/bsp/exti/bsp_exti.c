@@ -2,9 +2,21 @@
 
 #include "led/bsp_led.h"
 #include "key/bsp_key.h"
-////////////////////////////////////////////////////////////////////////// 	
+#include "bldc/bsp_bldc.h" 
 
-//外部中断初始化
+
+uint8_t IS_EnableMotor =0;
+uint8_t start_flag =0 ;
+uint8_t Global_sw = 0 ; 
+
+
+/****************************************************************
+  *
+  *外部中断初始化
+  *
+  *
+  *
+*****************************************************************/
 void EXTI_Init(void)
 {
     GPIO_InitTypeDef GPIO_Initure;
@@ -89,23 +101,34 @@ void EXTI15_10_IRQHandler(void)
     HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);  //调用中断处理公用函数
 }
 
-//中断服务程序中需要做的事情
-//在HAL库中所有的外部中断服务函数都会调用此函数
-//GPIO_Pin:中断引脚号
+/**********************************************************
+    *
+    //中断服务程序中需要做的事情
+    //在HAL库中所有的外部中断服务函数都会调用此函数
+    //GPIO_Pin:中断引脚号
+    *
+**********************************************************/
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-   // static uint8_t 
+   // static uint8_t i=0; 
     HAL_Delay(10);     //消抖
     switch(GPIO_Pin)
     {
         case GPIO_PIN_6:
             if(GLOBAL == 1 )	//控制LED0,LED1互斥点亮
             {
-                LED1_OFF;
-                LED2_OFF;
-                HAL_Delay(200);
-                LED1_ON;
-                LED2_ON;
+               
+                
+                  
+                    LED2_OFF;
+                    HAL_Delay(200);
+                    LED2_ON;
+                    start_flag = 0;
+                    Disable_BLDC();
+                    IS_EnableMotor = 0;  
+                   
+                    Global_sw = 1; 
+                                  
             }
             break;
       

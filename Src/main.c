@@ -15,10 +15,9 @@
 
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
-/* 私有变量 ------------------------------------------------------------------*/
-uint32_t IS_EnableMotor = 0;  // 使能电机标志
-int32_t  flag = 0;
-int32_t  start_flag = 0;
+//uint8_t IS_EnableMotor;
+//uint8_t start_flag ;
+//uint8_t Global_sw ;    
 
 uint8_t DMAaRxBuffer[8];                      // 接收数据 
 uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
@@ -133,15 +132,28 @@ int main(void)
      HAL_CAN_Receive(&hCAN,CAN_FIFO0,0xff);
      LED1_ON;
      LED2_OFF;
-	 ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+	        
+               
+     switch(key)//按键扫描
+     {
+       
+         case 0:
+             
+            ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
             HAL_Delay(10); 
 		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
 		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
            
-               //按键扫描
-     switch(key)
-     {
+            break;
+         
+         
          case START_PRES :
+           if(Global_sw > 1)
+           {
+           
+           }
+           else if(Global_sw ==1 )
+           {
            Enable_BLDC();
           /* 先以恒定的转空比启动,然后再来调速 */
     //      BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
@@ -149,6 +161,7 @@ int main(void)
           start_flag  = 1;
           IS_EnableMotor = 1;
           LED1_OFF;
+           }
              
              break;
          case BRAKE_PRES :
@@ -227,18 +240,7 @@ int main(void)
 			  LED1_OFF;
            
 		  	  break;
-	   #if 0
-	   case GLOBAL_PRES :
-		  	  LED1_OFF;
-              LED2_OFF;
-              HAL_Delay(200);
-              LED1_ON;
-              LED2_ON;
-			  HAL_Delay(200);
-			  LED1_OFF;
-              LED2_OFF;
-		  	  break;
-       #endif 
+	  
        case SPEED_ADD_PRES:
               LED1_OFF;
               LED2_OFF;
@@ -247,8 +249,9 @@ int main(void)
             
              LED2_ON;
              break;
+      }
      
-     }
+     
      
  
   }
