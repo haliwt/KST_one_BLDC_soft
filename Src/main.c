@@ -9,6 +9,8 @@
 #include "usart/bsp_usartx.h"
 #include "adc/bsp_adc.h"
 #include "CAN/bsp_CAN.h"
+#include "output/bsp_output.h"
+
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
 /* 私有变量 ------------------------------------------------------------------*/
@@ -95,8 +97,10 @@ int main(void)
   /* 初始化按键配置 */
   KEY_Init();
   /* 初始化指示灯 */
-  LED_GPIO_Init();
-  /* 初始化霍尔传感器接口 */
+   LED_GPIO_Init();
+  /* 输出控制GPIO */
+   OUTPUT_SIG_GPIO_Init();
+    /* 初始化霍尔传感器接口 */
     
   /* 初始化串口并配置串口中断优先级 */
   MX_USARTx_Init();
@@ -128,6 +132,10 @@ int main(void)
      HAL_CAN_Receive(&hCAN,CAN_FIFO0,0xff);
      LED1_ON;
      LED2_OFF;
+	 ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+            HAL_Delay(10); 
+		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
+		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
            
                //按键扫描
      switch(key)
@@ -172,14 +180,16 @@ int main(void)
              LED2_OFF;
              HAL_Delay(500);
              LED2_ON;
+             WIPER_ON;
          
              break;
          case AIR_PRES:
-             LED1_OFF;;
-             LED2_ON;;
+             LED1_OFF;
+             LED2_ON;
              HAL_Delay(500);
-             LED1_ON;;
-             LED2_OFF;;
+             LED1_ON;
+             LED2_OFF;
+             AIR_ON;
              break;
 		 case CAR_DOOR_PRES:
              LED1_ON;
@@ -189,6 +199,7 @@ int main(void)
              LED1_OFF;
 			 HAL_Delay(200);
              LED2_ON; 
+             PLC_ON;
 		     break;
          case PUMP_PRES:
 		 	 LED1_ON;
@@ -204,7 +215,7 @@ int main(void)
 			  HAL_Delay(200);
 			  LED2_OFF;
 			  break;
-	     #if 1
+	    
 		  case HALL_SW_PRES :
 		  	  LED1_OFF;
              
@@ -215,7 +226,7 @@ int main(void)
 			  LED1_OFF;
            
 		  	  break;
-	   #endif 
+	   
 	   case GLOBAL_PRES :
 		  	  LED1_OFF;
               LED2_OFF;
