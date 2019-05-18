@@ -10,7 +10,7 @@
 #include "adc/bsp_adc.h"
 #include "CAN/bsp_CAN.h"
 #include "output/bsp_output.h"
-
+#include "hallsw/bsp_hallsw.h"
 
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
@@ -103,7 +103,8 @@ int main(void)
    OUTPUT_SIG_GPIO_Init();
   /* 初始化串口并配置串口中断优先级 */
   MX_USARTx_Init();
-  
+  /*霍尔故障检测*/
+  HALL_JUDGE_Init();
   HALL_TIMx_Init();
   /* 初始化定时器各通道输出 */
   BLDCMOTOR_TIMx_Init();
@@ -236,6 +237,14 @@ int main(void)
 			  LED1_OFF;
               LED2_OFF;
 		  	  break;
+       case SPEED_ADD_PRES:
+              LED1_OFF;
+              LED2_OFF;
+             break;
+       case SPEED_REDUCE_PRES:
+            
+             LED2_ON;
+             break;
      
      }
      

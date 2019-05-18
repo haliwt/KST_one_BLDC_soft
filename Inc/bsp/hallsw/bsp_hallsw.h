@@ -4,13 +4,13 @@
 /* °üº¬Í·ÎÄ¼þ ----------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 
-#if 0
+
 
 //#define HALL_FAIL        HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_15)   //»ô¶û¹ÊÕÏ¼ì²â
 
-#define HALL_FAIL_RCC_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
-#define HALL_FAIL_GPIO_PIN                 GPIO_PIN_15 ////»ô¶û¹ÊÕÏ¼ì²â
-#define HALL_FAIL_GPIO                     GPIOB //WT.EDIT
+#define HALL_FAIL_RCC_CLK_ENABLE()         __HAL_RCC_GPIOD_CLK_ENABLE()
+#define HALL_FAIL_GPIO_PIN                 GPIO_PIN_10 ////»ô¶û¹ÊÕÏ¼ì²â
+#define HALL_FAIL_GPIO                     GPIOD //WT.EDIT
 
 
 #define HALL_FAIL_OFF                     HAL_GPIO_WritePin(HALL_FAIL_GPIO,HALL_FAIL_GPIO_PIN,GPIO_PIN_SET)    // Êä³ö¸ßµçÆ½
@@ -21,7 +21,7 @@
 
 
 void HALL_JUDGE_Init(void);
-#endif 
+
 
 #endif
 

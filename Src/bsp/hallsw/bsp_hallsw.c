@@ -1,6 +1,6 @@
 #include "hallsw/bsp_hallsw.h"
 
-#if 0
+
 void HALL_JUDGE_Init(void)
 {
      /* 定义IO硬件初始化结构体变量 */
@@ -25,4 +25,4 @@ void HALL_JUDGE_Init(void)
 
 }
 
-#endif     
+   
