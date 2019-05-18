@@ -11,6 +11,7 @@
 #include "CAN/bsp_CAN.h"
 #include "output/bsp_output.h"
 
+
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
 /* 私有变量 ------------------------------------------------------------------*/
@@ -100,8 +101,6 @@ int main(void)
    LED_GPIO_Init();
   /* 输出控制GPIO */
    OUTPUT_SIG_GPIO_Init();
-    /* 初始化霍尔传感器接口 */
-    
   /* 初始化串口并配置串口中断优先级 */
   MX_USARTx_Init();
   

@@ -4,12 +4,24 @@
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 
+#if 0
 
-#define NO_HALL_U         HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_12)   //霍尔信号切换，切换成无霍尔
+//#define HALL_FAIL        HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_15)   //霍尔故障检测
+
+#define HALL_FAIL_RCC_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
+#define HALL_FAIL_GPIO_PIN                 GPIO_PIN_15 ////霍尔故障检测
+#define HALL_FAIL_GPIO                     GPIOB //WT.EDIT
+
+
+#define HALL_FAIL_OFF                     HAL_GPIO_WritePin(HALL_FAIL_GPIO,HALL_FAIL_GPIO_PIN,GPIO_PIN_SET)    // 输出高电平
+#define HALL_FAIL_ON                      HAL_GPIO_WritePin(HALL_FAIL_GPIO,HALL_FAIL_GPIO_PIN,GPIO_PIN_RESET)  // 输出低电平
+               // 输出反转
 
 
 
-void NO_HALL_Init(void);
+
+void HALL_JUDGE_Init(void);
+#endif 
 
 #endif
 
