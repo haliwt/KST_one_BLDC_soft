@@ -2,12 +2,7 @@
 #define __BSP_OUTPUT_H__
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-/*
- * 以下宏定义内容跟开发板硬件息息相关，需要查看开发板电路原理图才能正确编写。
- * 例如，查原理图可在LED1灯接在stm32f407芯片的PH9引脚上，所以有关LED1的宏定义
- * 都是与GPIOH，GPIO_Pin_9相关的，我们专门把这些与开发板硬件相关的内容定义为宏，
- * 这对于修改或者移植程序非常方便。
- */
+
 #define AIR_RCC_CLK_ENABLE()         __HAL_RCC_GPIOA_CLK_ENABLE()
 #define AIR_GPIO_PIN                 GPIO_PIN_2  //空调输出
 #define AIR_GPIO                     GPIOA //WT.EDIT

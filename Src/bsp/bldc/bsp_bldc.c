@@ -3,8 +3,7 @@
 #include "bldc/bsp_bldc.h" 
 #include "main.h"
 #include "led/bsp_led.h"
-/* 私有类型定义 --------------------------------------------------------------*/
-/* 私有宏定义 ----------------------------------------------------------------*/
+
 /* 私有变量 ------------------------------------------------------------------*/
 TIM_HandleTypeDef      htimx_BLDC;
 TIM_HandleTypeDef      htimx_HALL;
@@ -188,7 +187,7 @@ void HALL_TIMx_Init(void)
   sHallSensorConfig.Commutation_Delay = 0U;             // 0 ,不使用延迟触发
   HAL_TIMEx_HallSensor_Init(&htimx_HALL,&sHallSensorConfig);
   
-  HAL_NVIC_SetPriority(HALL_TIM_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(HALL_TIM_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(HALL_TIM_IRQn);
 }
 

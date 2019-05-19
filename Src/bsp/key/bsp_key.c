@@ -41,7 +41,7 @@ void KEY_Init(void)
     GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
     HAL_GPIO_Init(GPIOB,&GPIO_Initure);
     
-    GPIO_Initure.Pin=GPIO_PIN_4;            //PA 4
+    GPIO_Initure.Pin=GPIO_PIN_4|GPIO_PIN_3;            //PA 4
     GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
     GPIO_Initure.Pull=GPIO_PULLUP;          //上拉
     GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
@@ -59,27 +59,30 @@ void KEY_Init(void)
     GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
     HAL_GPIO_Init(GPIOE,&GPIO_Initure);
 }
-
-//按键处理函数
-//返回按键值
-//mode:0,不支持连续按;1,支持连续按;
-//0，没有任何按键按下
-//1，WKUP按下 WK_UP
-//注意此函数有响应优先级,KEY0>KEY1>KEY2>WK_UP!!
+/*********************************************************************
+   *
+   *按键处理函数
+   *返回按键值
+   *mode:0,不支持连续按;1,支持连续按;
+   *0，没有任何按键按下
+   *1，WKUP按下 WK_UP
+   *注意此函数有响应优先级,KEY0>KEY1>KEY2>WK_UP!!
+   *
+**********************************************************************/
 uint8_t KEY_Scan(uint8_t mode)
 {
     static uint8_t key_up=1;     //按键松开标志
     if(mode==1)key_up=1;    //支持连按
-    if(key_up &&(START==0||BRAKE==0||KEY2==0
-        ||KEY3==0||WIPE==0||AIR==0)||CAR_DOOR==0
-        ||PUMP==0||TURN_LIGHT==0||HALL_SW==0||SPEED_ADD ==0 || SPEED_REDUCE ==0)
-    {
+    if(key_up && 
+          (START==0||BRAKE==0||DIR==0||STOP==0||WIPE==0||AIR==0 ||CAR_DOOR==0
+           ||PUMP==0||TURN_LIGHT==0||HALL_SW==0||SPEED_ADD ==0 || SPEED_REDUCE ==0))
+     {
         HAL_Delay(10);
         key_up=0;
-        if(START==0)                             return  START_PRES;
-        else if(BRAKE==0)                        return  BRAKE_PRES;
-        else if(KEY2==0)                         return  KEY2_PRES;
-        else if(KEY3==0)                         return  KEY3_PRES;  
+        if(BRAKE==0)                             return  BRAKE_PRES;
+        else if(START==0)                        return  START_PRES;
+        else if(DIR==0)                          return  DIR_PRES;
+        else if(STOP==0)                         return  STOP_PRES;  
         else if(WIPE== 0)                        return  WIPE_PRES;
         else if(AIR== 0)                         return  AIR_PRES;
 		else if(CAR_DOOR == 0)                   return  CAR_DOOR_PRES;
@@ -89,8 +92,8 @@ uint8_t KEY_Scan(uint8_t mode)
 		//else if(GLOBAL== 1)                       return  GLOBAL_PRES;
         else if(SPEED_ADD ==0)                   return  SPEED_ADD_PRES;
         else if(SPEED_REDUCE ==0)                return  SPEED_REDUCE_PRES;
-    }else if(START==1&&BRAKE==1&&KEY2==1&&KEY3==1&&WIPE==1&&AIR==1&&CAR_DOOR==1
-             &&PUMP==1 && TURN_LIGHT==1 && HALL_SW==1 
-              && SPEED_ADD ==1 && SPEED_REDUCE ==1)key_up=1;
+      }else if(START==1&&BRAKE==1&&DIR==1&&STOP==1&&WIPE==1&&AIR==1&&CAR_DOOR==1
+               &&PUMP==1 && TURN_LIGHT==1 && HALL_SW==1 
+               && SPEED_ADD ==1 && SPEED_REDUCE ==1)key_up=1;
     return 0;   //无按键按下
 }

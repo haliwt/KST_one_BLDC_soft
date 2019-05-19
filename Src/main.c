@@ -15,9 +15,7 @@
 
 /* 私有类型定义 --------------------------------------------------------------*/
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
-//uint8_t IS_EnableMotor;
-//uint8_t start_flag ;
-//uint8_t Global_sw ;    
+uint16_t SPEED_VALUE ;
 
 uint8_t DMAaRxBuffer[8];                      // 接收数据 
 uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
@@ -91,6 +89,7 @@ void SystemClock_Config(void)
 int main(void)
 {
   uint8_t key;
+  uint32_t sysper;
     /* 复位所有外设，初始化Flash接口和系统滴答定时器 */
   HAL_Init();
   /* 配置系统时钟 */
@@ -123,7 +122,7 @@ int main(void)
   CAN_SetTxMsg();
   
   //HAL_CAN_Receive_IT(&hCAN, CAN_FIFO0); 
-  
+ 
  
   while (1)
   {
@@ -132,36 +131,24 @@ int main(void)
      HAL_CAN_Receive(&hCAN,CAN_FIFO0,0xff);
      LED1_ON;
      LED2_OFF;
-	        
-               
+	 
      switch(key)//按键扫描
      {
        
-         case 0:
-             
-            ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
-            HAL_Delay(10); 
-		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
-		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
+        case START_PRES :
            
-            break;
-         
-         
-         case START_PRES :
-           if(Global_sw > 1)
-           {
+              Enable_BLDC();
+             /* 先以恒定的转空比启动,然后再来调速 */
+             //BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
+            //HAL_Delay(100);
+              ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+              HAL_Delay(10);
+              SPEED_VALUE = (float)(83 * ADC_ConvertedValueLocal - 82); //0~167 
+              BLDCMotor.PWM_Duty = BLDCMOTOR_TIM_PERIOD;
+              start_flag  = 1;
+              IS_EnableMotor = 1;
+              LED1_OFF;
            
-           }
-           else if(Global_sw ==1 )
-           {
-           Enable_BLDC();
-          /* 先以恒定的转空比启动,然后再来调速 */
-    //      BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
-    //      HAL_Delay(100);
-          start_flag  = 1;
-          IS_EnableMotor = 1;
-          LED1_OFF;
-           }
              
              break;
          case BRAKE_PRES :
@@ -171,20 +158,14 @@ int main(void)
              LED2_ON;        
              
              break;
-         case KEY2_PRES : //方向键
+         case DIR_PRES : //方向键
               Dir = -Dir;
               LED1_ON;
              
              break;
-         case KEY3_PRES :
+         case STOP_PRES : //启停按键
            
-            ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
-            HAL_Delay(10); 
-		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
-		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
-            
-          //  HAL_UART_Receive(&husartx,DMAaRxBuffer,8,0XFF);
-          //  HAL_UART_Transmit(&husartx,DMAaRxBuffer,8,0XFF);
+           
             
             LED1_OFF;
             LED2_OFF;
@@ -249,6 +230,22 @@ int main(void)
             
              LED2_ON;
              break;
+       
+      case 0:
+          #if 1
+            ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+            HAL_Delay(100); 
+		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
+		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
+            SPEED_VALUE = (float)(83 * ADC_ConvertedValueLocal - 82); //0~167 
+            
+            printf("SPEED_VALUE = %f  \r\n",(float)SPEED_VALUE); 
+           
+            BLDCMotor.PWM_Duty = BLDCMOTOR_TIM_PERIOD;
+         
+            HAL_Delay(1000);
+           #endif 
+            break;
       }
      
      

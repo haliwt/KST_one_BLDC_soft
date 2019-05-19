@@ -221,6 +221,7 @@ void CAN1_RX0_IRQHandler(void)
 
   /* USER CODE END USB_LP_CAN1_RX0_IRQn 1 */
 }
+#if 0
 /* USER CODE BEGIN 1 */
 void USARTx_DMAx_CHANNELn_IRQHANDLER(void)
 {
@@ -232,6 +233,7 @@ void USARTx_DMAx_CHANNELn_IRQHANDLER(void)
 
   /* USER CODE END DMA2_Stream7_IRQn 1 */
 }
+#endif 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

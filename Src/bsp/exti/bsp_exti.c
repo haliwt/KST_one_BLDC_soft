@@ -117,17 +117,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         case GPIO_PIN_6:
             if(GLOBAL == 1 )	//øÿ÷∆LED0,LED1ª•≥‚µ„¡¡
             {
+                LED2_OFF;
+                HAL_Delay(200);
+                LED2_ON;
+                start_flag = 0;
+                Disable_BLDC();
+                IS_EnableMotor = 0;  
                
-                
-                  
-                    LED2_OFF;
-                    HAL_Delay(200);
-                    LED2_ON;
-                    start_flag = 0;
-                    Disable_BLDC();
-                    IS_EnableMotor = 0;  
-                   
-                    Global_sw = 1; 
+                Global_sw = 1; 
                                   
             }
             break;

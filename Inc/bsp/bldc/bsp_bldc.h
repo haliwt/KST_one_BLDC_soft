@@ -41,10 +41,10 @@ typedef struct {
 #define BLDCMOTOR_TIM_BKIN_PORT               GPIOE//GPIOB             // Break in
 #define BLDCMOTOR_TIM_BKIN_PIN                GPIO_PIN_15//WT.EDIT GPIO_PIN_12
 
-#define BLDCMOTOR_TIM_PWM_FREQ                22000 // PWM频率
+#define BLDCMOTOR_TIM_PWM_FREQ                22000 //22000//5000 5KHZ//10 000 KHZ // 22KHzPWM频率 22000 22KHZ
 
 // 定义定时器预分频，定时器实际时钟频率为：168MHz/（BLDCMOTOR_TIMx_PRESCALER+1）
-#define BLDCMOTOR_TIM_PRESCALER                 3   // 实际时钟频率为：168/4MHz
+#define BLDCMOTOR_TIM_PRESCALER              SPEED_VALUE// 3   // 实际时钟频率为：168/4MHz
 
 // 定义定时器周期，当定时器开始计数到BLDCMOTOR_TIMx_PERIOD值并且重复计数寄存器为0时更新定时器并生成对应事件和中断
 #define BLDCMOTOR_TIM_PERIOD                  (SystemCoreClock/(BLDCMOTOR_TIM_PRESCALER+1)/BLDCMOTOR_TIM_PWM_FREQ)
@@ -94,6 +94,7 @@ extern __IO int32_t  uwStep ;
 extern __IO uint32_t Lock_Time; // 堵转时间
 extern __IO float   PWM_Duty;
 extern __IO int32_t Dir;
+extern uint16_t SPEED_VALUE ;   //调节PWM的速度（0~168）
 /* 函数声明 ------------------------------------------------------------------*/
 void HALL_TIMx_Init(void);
 void BLDCMOTOR_TIMx_Init(void);
