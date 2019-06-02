@@ -17,11 +17,12 @@
 #define SENDBUFF_SIZE              100  // 串口DMA发送缓冲区大小
 uint16_t SPEED_VALUE ;
 
-uint8_t DMAaRxBuffer[8];                      // 接收数据 
-uint8_t DMAaTxBuffer[SENDBUFF_SIZE];       // 串口DMA发送缓冲区
 // 用于保存转换计算后的电压值	 
-float ADC_ConvertedValueLocal;
-uint32_t ADC_ConvertedValue;
+__IO float ADC_ConvertedValueLocal[ADC_CHANNEL_NUMBER];
+// AD转换结果值
+uint32_t ADC_ConvertedValue[ADC_CHANNEL_NUMBER];
+uint32_t DMA_Transfer_Complete_Count=0;
+
 void CAN_SetTxMsg(void)
 {						 
   hCAN.pTxMsg->ExtId=0x1314;					   /* 使用的扩展ID */
@@ -88,8 +89,8 @@ void SystemClock_Config(void)
   */
 int main(void)
 {
-  uint8_t key;
-  uint32_t sysper;
+  uint8_t key,i;
+//  uint32_t sysper;
     /* 复位所有外设，初始化Flash接口和系统滴答定时器 */
   HAL_Init();
   /* 配置系统时钟 */
@@ -116,7 +117,9 @@ int main(void)
   MX_ADCx_Init();
 
   /* 启动AD转换并使能DMA传输和中断 */
-  HAL_ADC_Start_DMA(&hadcx,&ADC_ConvertedValue,1);  
+  //HAL_ADC_Start_DMA(&hadcx,&ADC_ConvertedValue,1);  
+   /* 启动AD转换并使能DMA传输和中断 */
+  HAL_ADC_Start_DMA(&hadcx,ADC_ConvertedValue,ADC_CHANNEL_NUMBER);  
   
    MX_CAN_Init();
   CAN_SetTxMsg();
@@ -141,9 +144,9 @@ int main(void)
              /* 先以恒定的转空比启动,然后再来调速 */
              //BLDCMotor.PWM_Duty = (int32_t)(BLDCMOTOR_TIM_PERIOD*5/100);
             //HAL_Delay(100);
-              ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
+              ADC_ConvertedValueLocal[i] =(double)(ADC_ConvertedValue[i]&0xFFF)*3.3/4096;	
               HAL_Delay(10);
-              SPEED_VALUE = (float)(83 * ADC_ConvertedValueLocal - 82); //0~167 
+              SPEED_VALUE = (float)(83 * ADC_ConvertedValueLocal[i] - 82); //0~167 
               BLDCMotor.PWM_Duty = BLDCMOTOR_TIM_PERIOD;
               start_flag  = 1;
               IS_EnableMotor = 1;
@@ -232,19 +235,28 @@ int main(void)
              break;
        
       case 0:
-          #if 1
-            ADC_ConvertedValueLocal =(double)ADC_ConvertedValue*3.3/4096; 	
-            HAL_Delay(100); 
-		    printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue); 
-		    printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueLocal); 
-            SPEED_VALUE = (float)(83 * ADC_ConvertedValueLocal - 82); //0~167 
-            
-            printf("SPEED_VALUE = %f  \r\n",(float)SPEED_VALUE); 
-           
-            BLDCMotor.PWM_Duty = BLDCMOTOR_TIM_PERIOD;
-         
-            HAL_Delay(1000);
-           #endif 
+			  {
+				  HAL_Delay(1000);
+    
+					for(i=1;i<ADC_CHANNEL_NUMBER;i++)
+					{
+					  /* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
+						 即当输入为3.3V时，AD转换结果为4096 */    
+					  ADC_ConvertedValueLocal[i] =(double)(ADC_ConvertedValue[i]&0xFFF)*3.3/4096; // ADC_ConvertedValue[0]只取最低12有效数据
+					}
+					
+					for(i=1;i<ADC_CHANNEL_NUMBER;i++)
+					{
+					  printf("CH%d value = %d -> %fV\n",i,ADC_ConvertedValue[i]&0xFFF,ADC_ConvertedValueLocal[i]);
+					}   
+					
+					printf("已经完成AD转换次数：%d\n",DMA_Transfer_Complete_Count);
+					DMA_Transfer_Complete_Count=0;
+					printf("\n");   
+			  
+			  
+			  
+			  }
             break;
       }
      

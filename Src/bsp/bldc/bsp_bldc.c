@@ -277,7 +277,7 @@ void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim)
   {
     uwStep = (uint32_t)7 - uwStep;        // 根据顺序表的规律 CW = 7 - CCW;
   }
-#if 0
+#if 0  //WT.EDIT
   if( PWM_ChangeFlag == 1)
   {
     if(BLDCMotor.Dir == CW)

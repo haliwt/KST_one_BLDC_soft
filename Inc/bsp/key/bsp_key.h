@@ -10,7 +10,7 @@
 #define DIR                HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_4) 	//方向按键
 #define STOP               HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5)  //启停按键
 #define WIPE               HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_4)  //WIPE WASH 雨刮器
-#define AIR                HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)  //air conditioner  空调
+#define AIR                HAL_GPIO_ReadPin(GPIOH,GPIO_PIN_1)  //air conditioner  空调
 #define CAR_DOOR           HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10)  //车门控制
 #define PUMP               HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_12)  //打气泵
 #define TURN_LIGHT         HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14)  //转向灯

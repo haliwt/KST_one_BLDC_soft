@@ -27,6 +27,7 @@ void KEY_Init(void)
     __HAL_RCC_GPIOA_CLK_ENABLE(); 
 	__HAL_RCC_GPIOD_CLK_ENABLE(); 
     __HAL_RCC_GPIOE_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
     
     GPIO_Initure.Pin=GPIO_PIN_4|GPIO_PIN_5;            //PC4
     GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
@@ -58,6 +59,12 @@ void KEY_Init(void)
     GPIO_Initure.Pull=GPIO_PULLDOWN;        //下拉
     GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
     HAL_GPIO_Init(GPIOE,&GPIO_Initure);
+    
+    GPIO_Initure.Pin=GPIO_PIN_1;            //GPIO_H_1
+    GPIO_Initure.Mode=GPIO_MODE_INPUT;      //输入
+    GPIO_Initure.Pull=GPIO_PULLDOWN;        //下拉
+    GPIO_Initure.Speed=GPIO_SPEED_HIGH;     //高速
+    HAL_GPIO_Init(GPIOH,&GPIO_Initure);
 }
 /*********************************************************************
    *
